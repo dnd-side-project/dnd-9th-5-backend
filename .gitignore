@@ -195,4 +195,4 @@ gradle-app.setting
 *.hprof
 
 # Key file
-*application.properties
+application.properties
