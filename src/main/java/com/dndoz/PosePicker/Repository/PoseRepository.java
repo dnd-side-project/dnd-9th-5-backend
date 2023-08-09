@@ -1,5 +1,6 @@
-package com.dndoz.PosePicker.domain;
+package com.dndoz.PosePicker.Repository;
 
+import com.dndoz.PosePicker.Domain.PoseWord;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

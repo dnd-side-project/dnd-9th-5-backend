@@ -1,8 +1,8 @@
-package com.dndoz.PosePicker.service;
+package com.dndoz.PosePicker.Service;
 
-import com.dndoz.PosePicker.domain.PoseRepository;
-import com.dndoz.PosePicker.domain.PoseWord;
-import com.dndoz.PosePicker.dto.PoseTalkResponse;
+import com.dndoz.PosePicker.Repository.PoseRepository;
+import com.dndoz.PosePicker.Domain.PoseWord;
+import com.dndoz.PosePicker.Dto.PoseTalkResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

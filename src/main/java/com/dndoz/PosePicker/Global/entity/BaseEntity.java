@@ -1,4 +1,4 @@
-package com.dndoz.PosePicker.global.entity;
+package com.dndoz.PosePicker.Global.entity;
 
 import java.time.LocalDateTime;
 import javax.persistence.Column;

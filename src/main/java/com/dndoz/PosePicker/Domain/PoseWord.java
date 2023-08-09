@@ -1,6 +1,6 @@
-package com.dndoz.PosePicker.domain;
+package com.dndoz.PosePicker.Domain;
 
-import com.dndoz.PosePicker.global.entity.BaseEntity;
+import com.dndoz.PosePicker.Global.entity.BaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

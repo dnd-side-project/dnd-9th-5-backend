@@ -1,4 +1,4 @@
-package com.dndoz.PosePicker.config;
+package com.dndoz.PosePicker.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,5 +1,5 @@
-package com.dndoz.PosePicker.dto;
-import com.dndoz.PosePicker.domain.PoseWord;
+package com.dndoz.PosePicker.Dto;
+import com.dndoz.PosePicker.Domain.PoseWord;
 
 public class PoseTalkResponse {
     private PoseWord poseWord;

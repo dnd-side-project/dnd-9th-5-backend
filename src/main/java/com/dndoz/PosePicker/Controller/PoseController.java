@@ -1,6 +1,6 @@
-package com.dndoz.PosePicker.controller;
+package com.dndoz.PosePicker.Controller;
 
-import com.dndoz.PosePicker.dto.PoseTalkResponse;
+import com.dndoz.PosePicker.Dto.PoseTalkResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dndoz.PosePicker.service.PoseService;
+import com.dndoz.PosePicker.Service.PoseService;
 
 @RestController
 @RequestMapping("/api/pose")
