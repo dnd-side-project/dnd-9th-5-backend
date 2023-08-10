@@ -5,6 +5,7 @@ import com.dndoz.PosePicker.Service.PoseInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,10 @@ public class PoseInfoController {
     //포즈 이미지 상세 조회
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{pose_id}")
-    @ApiResponse(code = 200, message = "Pose Info Data")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "포즈 사진 상세 조회 성공"),
+            @ApiResponse(code=401, message="접근 권한이 없습니다.")
+    })
     @ApiOperation(value = "포즈 사진 상세 조회", notes = "사진 클릭 시 포즈상세정보")
     public ResponseEntity<PoseInfoResponse> getPoseInfo(@PathVariable Long pose_id) {
         try{

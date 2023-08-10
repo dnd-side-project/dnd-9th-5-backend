@@ -1,5 +1,6 @@
 package com.dndoz.PosePicker.Domain;
 
+import io.swagger.annotations.ApiModel;
 import lombok.*;
 
 import javax.persistence.*;
@@ -10,6 +11,7 @@ import javax.persistence.*;
 @Entity(name="pose_info")
 @Getter @Setter
 
+@ApiModel(value="포즈 상세 이미지 모델: PoseInfo")
 public class PoseInfo {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long pose_id;
