@@ -8,6 +8,9 @@ import io.swagger.annotations.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/pose")
@@ -26,7 +29,12 @@ public class PoseInfoController {
     @ApiResponse(code = 200, message = "Pose Info Data")
     @ApiOperation(value = "포즈 사진 상세 조회", notes = "사진 클릭 시 포즈상세정보")
     public ResponseEntity<PoseInfoResponse> getPoseInfo(@PathVariable Long pose_id) {
+        try{
             return ResponseEntity.ok(poseInfoService.getPoseInfo(pose_id));
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Item Not Found");
+        }
+
     }
 
 }
