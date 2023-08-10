@@ -12,7 +12,7 @@ import javax.persistence.*;
 
 public class PoseInfo {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer pose_id;
+    private Long pose_id;
 
     @Column(name = "image_key")
     String image_key;

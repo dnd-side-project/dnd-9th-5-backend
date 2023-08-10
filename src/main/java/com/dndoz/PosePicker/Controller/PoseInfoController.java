@@ -1,37 +1,32 @@
 package com.dndoz.PosePicker.Controller;
 
-import com.dndoz.PosePicker.Domain.PoseInfo;
-import com.dndoz.PosePicker.Repository.PoseInfoRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.dndoz.PosePicker.Dto.PoseInfoResponse;
+import com.dndoz.PosePicker.Service.PoseInfoService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
-
 @RestController
-@RequiredArgsConstructor
-@RequestMapping("/pose")
+@RequestMapping("/api/pose")
+@Api(tags = {"포즈사진 API"})
 public class PoseInfoController {
 
-    @Autowired
-    private PoseInfoRepository poseInfoRepository;
+    private final PoseInfoService poseInfoService;
 
-    //전체 포즈 조회
-    @GetMapping("/")
-    public List<PoseInfo> showAllPoseInfo() {
-        return poseInfoRepository.findAll();
+    public PoseInfoController(final PoseInfoService poseInfoService) {
+        this.poseInfoService=poseInfoService;
     }
 
-    //상세 포즈 조회
+    //포즈 이미지 상세 조회
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{pose_id}")
-    public PoseInfo showDetailPoseInfo(@PathVariable int pose_id) {
-        Optional<PoseInfo> poseInfo = poseInfoRepository.findById(pose_id);
-
-        if(!poseInfo.isPresent()){
-            return poseInfo.orElse(null);
-        }
-        return poseInfo.get();
+    @ApiResponse(code = 200, message = "Pose Info Data")
+    @ApiOperation(value = "포즈 사진 상세 조회", notes = "사진 클릭 시 포즈상세정보")
+    public ResponseEntity<PoseInfoResponse> getPoseInfo(@PathVariable Long pose_id) {
+            return ResponseEntity.ok(poseInfoService.getPoseInfo(pose_id));
     }
 
 }

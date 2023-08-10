@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 
 
 @Repository
-public interface PoseInfoRepository extends JpaRepository<PoseInfo,Integer> {
+public interface PoseInfoRepository extends JpaRepository<PoseInfo,Long> {
 
 }
