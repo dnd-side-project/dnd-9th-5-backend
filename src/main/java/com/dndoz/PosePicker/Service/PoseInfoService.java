@@ -25,4 +25,11 @@ public class PoseInfoService {
             return null;
         }
     }
+
+    //포즈픽(사진) 조회
+    public PoseInfoResponse showRandomPoseInfo(Integer people_count){
+        PoseInfo poseInfo= poseInfoRepository.findRandomPoseInfo(people_count);
+        return new PoseInfoResponse(poseInfo);
+    }
+
 }
