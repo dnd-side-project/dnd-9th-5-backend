@@ -41,4 +41,18 @@ public class PoseInfoController {
 
     }
 
+    //포즈픽 사진 조회
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/pick/{people_count}")
+    @ApiResponse(code = 200, message = "포즈픽 데이터 전달 성공")
+    @ApiOperation(value = "포즈픽", notes = "포즈사진 랜덤픽")
+    public ResponseEntity<PoseInfoResponse> showRandomPoseInfo(@PathVariable int people_count) {
+        try{
+            return ResponseEntity.ok(poseInfoService.showRandomPoseInfo(people_count));
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Item Not Found");
+        }
+    }
+
+
 }

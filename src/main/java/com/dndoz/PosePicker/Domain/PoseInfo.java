@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Entity(name="pose_info")
 @Getter @Setter
 
-@ApiModel(value="포즈 상세 이미지 모델: PoseInfo")
+@ApiModel(value="포즈 이미지 모델: PoseInfo")
 public class PoseInfo {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long pose_id;
