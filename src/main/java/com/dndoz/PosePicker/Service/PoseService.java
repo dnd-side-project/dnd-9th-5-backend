@@ -1,26 +1,33 @@
 package com.dndoz.PosePicker.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dndoz.PosePicker.Domain.PoseInfo;
+import com.dndoz.PosePicker.Domain.PoseTagAttribute;
 import com.dndoz.PosePicker.Domain.PoseTalk;
 import com.dndoz.PosePicker.Dto.PoseInfoResponse;
+import com.dndoz.PosePicker.Dto.PoseTagAttributeResponse;
 import com.dndoz.PosePicker.Dto.PoseTalkResponse;
 import com.dndoz.PosePicker.Repository.PoseInfoRepository;
 import com.dndoz.PosePicker.Repository.PoseTalkRepository;
+import com.dndoz.PosePicker.Repository.PoseTagAttributeRepository;
 
 @Transactional(readOnly = true)
 @Service
 public class PoseService {
 	private final PoseInfoRepository poseInfoRepository;
 	private final PoseTalkRepository poseTalkRepository;
+	private final PoseTagAttributeRepository poseTagAttributeRepository;
 
-	public PoseService(final PoseInfoRepository poseInfoRepository, final PoseTalkRepository poseTalkRepository) {
+	public PoseService(final PoseInfoRepository poseInfoRepository, final PoseTalkRepository poseTalkRepository,
+		final PoseTagAttributeRepository poseTagAttributeRepository) {
 		this.poseInfoRepository = poseInfoRepository;
 		this.poseTalkRepository = poseTalkRepository;
+		this.poseTagAttributeRepository = poseTagAttributeRepository;
 	}
 
 	//포즈 이미지 상세 조회
@@ -43,5 +50,11 @@ public class PoseService {
 	public PoseTalkResponse findRandomPoseTalk() {
 		PoseTalk poseWord = poseTalkRepository.findRandomPoseTalk();
 		return new PoseTalkResponse(poseWord);
+	}
+
+	//포즈 태그 속성 조회
+	public PoseTagAttributeResponse findPoseTagAttribute() {
+		List<PoseTagAttribute> poseTagAttributes = poseTagAttributeRepository.findPoseTagAttribute();
+		return new PoseTagAttributeResponse(poseTagAttributes);
 	}
 }

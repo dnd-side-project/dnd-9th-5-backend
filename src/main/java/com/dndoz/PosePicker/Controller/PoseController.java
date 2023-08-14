@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.dndoz.PosePicker.Dto.PoseInfoResponse;
+import com.dndoz.PosePicker.Dto.PoseTagAttributeResponse;
 import com.dndoz.PosePicker.Dto.PoseTalkResponse;
 import com.dndoz.PosePicker.Service.PoseService;
 
@@ -79,4 +80,15 @@ public class PoseController {
 		return ResponseEntity.ok(poseService.findRandomPoseTalk());
 	}
 
+	/**
+	 * @Description 포즈 태그 리스트 조회
+	 * @return
+	 */
+	@ResponseStatus(HttpStatus.OK)
+	@GetMapping("/tags")
+	@ApiResponse(code = 200, message = "포즈 태그 리스트 전달 성공")
+	@ApiOperation(value = "포즈 태그", notes = "포즈 태그 리스트")
+	public ResponseEntity<PoseTagAttributeResponse> findPoseTagAttribute() {
+		return ResponseEntity.ok(poseService.findPoseTagAttribute());
+	}
 }
