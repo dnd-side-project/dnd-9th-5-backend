@@ -5,35 +5,34 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
+
+import com.dndoz.PosePicker.Global.entity.BaseEntity;
 
 import io.swagger.annotations.ApiModel;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+@ApiModel(value = "포즈 단어 모델: PoseTalk")
 @AllArgsConstructor
-@Data
+@Entity(name = "pose_word")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "pose_info")
-@Getter
-@Setter
-
-@ApiModel(value = "포즈 이미지 모델: PoseInfo")
-public class PoseInfo {
-	@Column(name = "image_key")
-	String image_key;
-	@Column(name = "source")
-	String pose_source;
+@Table(name = "pose_word")
+public class PoseTalk extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long pose_id;
-	@Column(name = "people_count")
-	private Integer people_count;
+	@Column(name = "word_id")
+	private Long wordId;
 
-	@Column(name = "frame_count")
-	private Integer frame_count;
+	@Column(name = "content", nullable = false)
+	private String content;
 
+	public Long getWordId() {
+		return wordId;
+	}
+
+	public String getContent() {
+		return content;
+	}
 }
