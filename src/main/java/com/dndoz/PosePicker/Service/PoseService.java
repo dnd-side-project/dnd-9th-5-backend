@@ -1,8 +1,8 @@
 package com.dndoz.PosePicker.Service;
 
 import java.util.List;
-import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,8 +13,8 @@ import com.dndoz.PosePicker.Dto.PoseInfoResponse;
 import com.dndoz.PosePicker.Dto.PoseTagAttributeResponse;
 import com.dndoz.PosePicker.Dto.PoseTalkResponse;
 import com.dndoz.PosePicker.Repository.PoseInfoRepository;
-import com.dndoz.PosePicker.Repository.PoseTalkRepository;
 import com.dndoz.PosePicker.Repository.PoseTagAttributeRepository;
+import com.dndoz.PosePicker.Repository.PoseTalkRepository;
 
 @Transactional(readOnly = true)
 @Service
@@ -22,6 +22,8 @@ public class PoseService {
 	private final PoseInfoRepository poseInfoRepository;
 	private final PoseTalkRepository poseTalkRepository;
 	private final PoseTagAttributeRepository poseTagAttributeRepository;
+	@Value("${aws.imageUrl.prefix}")
+	private String urlPrefix;
 
 	public PoseService(final PoseInfoRepository poseInfoRepository, final PoseTalkRepository poseTalkRepository,
 		final PoseTagAttributeRepository poseTagAttributeRepository) {
@@ -32,17 +34,14 @@ public class PoseService {
 
 	//포즈 이미지 상세 조회
 	public PoseInfoResponse getPoseInfo(Long pose_id) {
-		Optional<PoseInfo> optionalPoseInfo = poseInfoRepository.findById(pose_id);
-		if (optionalPoseInfo.isPresent()) {
-			return new PoseInfoResponse(optionalPoseInfo.get());
-		} else {
-			return null;
-		}
+		PoseInfo poseInfo = poseInfoRepository.findById(pose_id).orElseThrow(NullPointerException::new);
+		poseInfo.setImageKey(urlPrefix + poseInfo.getImageKey());
+		return new PoseInfoResponse(poseInfo);
 	}
 
 	//포즈픽(사진) 조회
 	public PoseInfoResponse showRandomPoseInfo(Integer people_count) {
-		PoseInfo poseInfo = poseInfoRepository.findRandomPoseInfo(people_count);
+		PoseInfo poseInfo = poseInfoRepository.findRandomPoseInfo(people_count).orElseThrow(NullPointerException::new);
 		return new PoseInfoResponse(poseInfo);
 	}
 
