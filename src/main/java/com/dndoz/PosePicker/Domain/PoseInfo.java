@@ -36,7 +36,7 @@ public class PoseInfo extends BaseEntity {
 	@Column(name = "frame_count")
 	private Long frameCount;
 
-	@JoinColumn(name="tag_attributes")
+	@JoinColumn(name = "tag_attributes")
 	private String tagAttributes;
 
 	public Long getPoseId() {

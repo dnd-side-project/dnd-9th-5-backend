@@ -1,19 +1,20 @@
 package com.dndoz.PosePicker.Controller;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.dndoz.PosePicker.Dto.PoseFeedResponse;
 import com.dndoz.PosePicker.Dto.PoseInfoResponse;
 import com.dndoz.PosePicker.Dto.PoseTagAttributeResponse;
 import com.dndoz.PosePicker.Dto.PoseTalkResponse;
@@ -95,52 +96,33 @@ public class PoseController {
 		return ResponseEntity.ok(poseService.findPoseTagAttribute());
 	}
 
-	// @ResponseStatus(HttpStatus.OK)
-	// @GetMapping
-	// @ApiResponse(code = 200, message = "전체 포즈 피드 리스트 조회 성공")
-	// @ApiOperation(value = "전체 포즈 피드 리스트", notes = "전체 포즈 피드 리스트")
-	// public ResponseEntity<PoseFeedResponse> findByFilter(
-	// 	@PoseFilter PoseCondition poseCondition,
-	// 	@RequestParam(defaultValue = "0") int page,
-	// 	@RequestParam(defaultValue = "20") int size
-	// 	) {
-	// 	Pageable pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
-	// 	return ResponseEntity.ok(poseService.findByFilter(poseCondition, pageRequest));
-	// }
-	//
-	// @GetMapping
-	// public ResponseEntity<MemberTicketsResponse> findAll(
-	// 	@Login LoginMember loginMember,
-	// 	@RequestParam(defaultValue = "0") int page,
-	// 	@RequestParam(defaultValue = "100") int size) {
-	// 	Pageable pageRequest = PageRequest.of(page, size, Sort.by("entryTime").descending());
-	// 	MemberTicketsResponse response = memberTicketService.findAll(loginMember.memberId(), pageRequest);
-	// 	return ResponseEntity.ok()
-	// 		.body(response);
-	// }
-	// ... 기존의 메소드 및 필드들
-
 	/**
 	 * @Description 포즈 피드 전체 조회
 	 * @return
 	 */
-	@GetMapping()
+	@GetMapping("/all")
 	@ApiResponse(code = 200, message = "포즈 피드 리스트 전달 성공")
 	@ApiOperation(value = "포즈 피드", notes = "포즈 피드 리스트")
-	public ResponseEntity<Page<PoseInfoResponse>> getPoses(
-		@PageableDefault(size = 20) final Pageable pageable) {
+	public ResponseEntity<Slice<PoseInfoResponse>> getPoses(@RequestParam final Integer pageNumber,
+		@RequestParam final Integer pageSize) {
 
-		return ResponseEntity.ok(poseService.findPoses(pageable));
+		return ResponseEntity.ok(poseService.findPoses(pageNumber, pageSize));
 	}
 
-	// @GetMapping()
-	// @ApiResponse(code = 200, message = "포즈 피드 리스트 전달 성공")
-	// @ApiOperation(value = "포즈 피드", notes = "포즈 피드 리스트")
-	// public ResponseEntity<Page<PoseInfoResponse>> getPosesByCriteria(
-	// 	final PoseFeedRequest poseFeedRequest,
-	// 	@PageableDefault(size = 20) final Pageable pageable) {
-	//
-	// 	return ResponseEntity.ok(poseService.findPosesByCriteria(poseFeedRequest, pageable));
-	// }
-
+	/**
+	 * @Description 포즈 피드 필터링 조회
+	 * @return
+	 */
+	@GetMapping()
+	@ApiResponse(code = 200, message = "포즈 피드 리스트 전달 성공")
+	@ApiOperation(value = "포즈 피드 필터링 데이터", notes = "포즈 피드 리스트")
+	public ResponseEntity<PoseFeedResponse> getPoseFeed(
+		@RequestParam(name = "pageNumber", defaultValue = "0") final Integer pageNumber,
+		@RequestParam(name = "pageSize", defaultValue = "20") final Integer pageSize,
+		@RequestParam(name = "peopleCount", defaultValue = "0") final Long peopleCount,
+		@RequestParam(name = "frameCount", defaultValue = "0") final Long frameCount,
+		@RequestParam(name = "tags", defaultValue = "0") final List<String> tags) {
+		return ResponseEntity.ok(poseService.getPoseFeed(pageNumber, pageSize, peopleCount, frameCount, tags));
+	}
 }
+

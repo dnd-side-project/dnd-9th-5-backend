@@ -3,16 +3,16 @@ package com.dndoz.PosePicker.Service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dndoz.PosePicker.Domain.PoseInfo;
 import com.dndoz.PosePicker.Domain.PoseTagAttribute;
 import com.dndoz.PosePicker.Domain.PoseTalk;
-import com.dndoz.PosePicker.Dto.PoseFeedRequest;
-// import com.dndoz.PosePicker.Dto.PoseFeedResponse;
+import com.dndoz.PosePicker.Dto.PoseFeedResponse;
 import com.dndoz.PosePicker.Dto.PoseInfoResponse;
 import com.dndoz.PosePicker.Dto.PoseTagAttributeResponse;
 import com.dndoz.PosePicker.Dto.PoseTalkResponse;
@@ -30,7 +30,8 @@ public class PoseService {
 	@Value("${aws.image_url.prefix}")
 	private String urlPrefix;
 
-	public PoseService(final PoseInfoRepository poseInfoRepository, final PoseTalkRepository poseTalkRepository, final PoseTagAttributeRepository poseTagAttributeRepository) {
+	public PoseService(final PoseInfoRepository poseInfoRepository, final PoseTalkRepository poseTalkRepository,
+		final PoseTagAttributeRepository poseTagAttributeRepository) {
 		this.poseInfoRepository = poseInfoRepository;
 		this.poseTalkRepository = poseTalkRepository;
 		this.poseTagAttributeRepository = poseTagAttributeRepository;
@@ -60,40 +61,29 @@ public class PoseService {
 		return new PoseTagAttributeResponse(poseTagAttributes);
 	}
 
-	// @Transactional(readOnly = true)
-	// public PoseFeedResponse findByFilter(PoseCondition poseCondition, Pageable pageable) {
-	// 	List<PoseInfo> memberTickets = poseInfoRepository.findByFilter(poseCondition, pageable);
-	// 	return memberTickets.stream()
-	// 		.collect(collectingAndThen(toList(), MemberTicketsResponse::from));
-	// }
-
 	@Transactional(readOnly = true)
-	public Page<PoseInfoResponse> findPoses(final Pageable pageable) {
+	public Slice<PoseInfoResponse> findPoses(final Integer pageNumber, final Integer pageSize) {
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 		return poseInfoRepository.findPoses(pageable).map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
 	}
 
-	// ... 기존의 메소드 및 필드들
-
 	@Transactional(readOnly = true)
-	public Page<PoseInfoResponse> findPosesByCriteria(final PoseFeedRequest poseFeedRequest, final Pageable pageable) {
-		Page<PoseInfo>  Response;
-		Long peopleCount = poseFeedRequest.getPeopleCount();
-		Long frameCount = poseFeedRequest.getFrameCount();
-		List<Long> tags = poseFeedRequest.getTags();
+	public PoseFeedResponse getPoseFeed(final Integer pageNumber, final Integer pageSize, final Long peopleCount,
+		final Long frameCount, final List<String> tags) {
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+		Slice<PoseInfoResponse> filteredContents;
+		Slice<PoseInfoResponse> recommendedContents;
 
-		System.out.println(peopleCount + frameCount + tags.get(0));
+		filteredContents = poseInfoRepository.findByFilter(pageable, peopleCount, frameCount, tags)
+			.map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
 
-		if (peopleCount == 0 && frameCount == 0)
-			Response = poseInfoRepository.findPosesByTags(tags, pageable);
-		else if (peopleCount == 0)
-			Response = poseInfoRepository.findPosesByFrameCount(frameCount, tags, pageable);
-		else if (frameCount == 0)
-			Response = poseInfoRepository.findPosesByPeopleCount(peopleCount, tags, pageable);
-		else if (tags.isEmpty())
-			Response = poseInfoRepository.findPoses(pageable);
-		else
-			Response = poseInfoRepository.findPosesByCriteria(peopleCount, frameCount, tags, pageable);
-
-		return Response.map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
+		if (filteredContents.getNumberOfElements() < 5) {
+			recommendedContents = poseInfoRepository.getRecommendedContents(pageable)
+				.map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
+			return new PoseFeedResponse(filteredContents, recommendedContents);
+		} else {
+			return new PoseFeedResponse(filteredContents);
+		}
 	}
+
 }
