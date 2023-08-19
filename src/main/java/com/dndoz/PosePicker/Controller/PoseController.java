@@ -2,6 +2,9 @@ package com.dndoz.PosePicker.Controller;
 
 import java.util.NoSuchElementException;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,7 +63,7 @@ public class PoseController {
 	@GetMapping("/pick/{people_count}")
 	@ApiResponse(code = 200, message = "포즈픽 데이터 전달 성공")
 	@ApiOperation(value = "포즈픽", notes = "포즈사진 랜덤픽")
-	public ResponseEntity<PoseInfoResponse> showRandomPoseInfo(@PathVariable int people_count) {
+	public ResponseEntity<PoseInfoResponse> showRandomPoseInfo(@PathVariable Long people_count) {
 		try {
 			return ResponseEntity.ok(poseService.showRandomPoseInfo(people_count));
 		} catch (NoSuchElementException e) {
@@ -91,4 +94,53 @@ public class PoseController {
 	public ResponseEntity<PoseTagAttributeResponse> findPoseTagAttribute() {
 		return ResponseEntity.ok(poseService.findPoseTagAttribute());
 	}
+
+	// @ResponseStatus(HttpStatus.OK)
+	// @GetMapping
+	// @ApiResponse(code = 200, message = "전체 포즈 피드 리스트 조회 성공")
+	// @ApiOperation(value = "전체 포즈 피드 리스트", notes = "전체 포즈 피드 리스트")
+	// public ResponseEntity<PoseFeedResponse> findByFilter(
+	// 	@PoseFilter PoseCondition poseCondition,
+	// 	@RequestParam(defaultValue = "0") int page,
+	// 	@RequestParam(defaultValue = "20") int size
+	// 	) {
+	// 	Pageable pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
+	// 	return ResponseEntity.ok(poseService.findByFilter(poseCondition, pageRequest));
+	// }
+	//
+	// @GetMapping
+	// public ResponseEntity<MemberTicketsResponse> findAll(
+	// 	@Login LoginMember loginMember,
+	// 	@RequestParam(defaultValue = "0") int page,
+	// 	@RequestParam(defaultValue = "100") int size) {
+	// 	Pageable pageRequest = PageRequest.of(page, size, Sort.by("entryTime").descending());
+	// 	MemberTicketsResponse response = memberTicketService.findAll(loginMember.memberId(), pageRequest);
+	// 	return ResponseEntity.ok()
+	// 		.body(response);
+	// }
+	// ... 기존의 메소드 및 필드들
+
+	/**
+	 * @Description 포즈 피드 전체 조회
+	 * @return
+	 */
+	@GetMapping()
+	@ApiResponse(code = 200, message = "포즈 피드 리스트 전달 성공")
+	@ApiOperation(value = "포즈 피드", notes = "포즈 피드 리스트")
+	public ResponseEntity<Page<PoseInfoResponse>> getPoses(
+		@PageableDefault(size = 20) final Pageable pageable) {
+
+		return ResponseEntity.ok(poseService.findPoses(pageable));
+	}
+
+	// @GetMapping()
+	// @ApiResponse(code = 200, message = "포즈 피드 리스트 전달 성공")
+	// @ApiOperation(value = "포즈 피드", notes = "포즈 피드 리스트")
+	// public ResponseEntity<Page<PoseInfoResponse>> getPosesByCriteria(
+	// 	final PoseFeedRequest poseFeedRequest,
+	// 	@PageableDefault(size = 20) final Pageable pageable) {
+	//
+	// 	return ResponseEntity.ok(poseService.findPosesByCriteria(poseFeedRequest, pageable));
+	// }
+
 }
