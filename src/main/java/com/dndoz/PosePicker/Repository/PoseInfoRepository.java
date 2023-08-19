@@ -15,21 +15,21 @@ import com.dndoz.PosePicker.Domain.PoseInfo;
 @Repository
 public interface PoseInfoRepository extends JpaRepository<PoseInfo, Long> {
 	@Query(value =
-		"SELECT p.pose_id, p.image_key, p.source, p.source_url, p.people_count, p.frame_count, p.created_at, p.updated_at,"
-			+ "GROUP_CONCAT(ta.attribute) AS tag_attributes " + "FROM pose_info p "
-			+ "JOIN tag t ON p.pose_id = t.pose_id " + "JOIN tag_attribute ta ON t.attribute_id = ta.attribute_id "
+		"SELECT p.*, GROUP_CONCAT(ta.attribute ORDER BY ta.attribute_id ASC) AS tag_attributes FROM pose_info p "
+			+ "JOIN tag t ON p.pose_id = t.pose_id "
+			+ "JOIN tag_attribute ta ON t.attribute_id = ta.attribute_id "
 			+ "WHERE (p.pose_id = :pose_id) "
-			+ "GROUP BY p.pose_id, p.image_key, p.source, p.source_url, p.people_count, p.frame_count, p.created_at, p.updated_at ", nativeQuery = true)
+			+ "GROUP BY p.pose_id", nativeQuery = true)
 	Optional<PoseInfo> findByPoseId(Long pose_id);
 
 	@Query(value =
-		"SELECT p.pose_id, p.image_key, p.source, p.source_url, p.people_count, p.frame_count, p.created_at, p.updated_at,"
-			+ "GROUP_CONCAT(ta.attribute) AS tag_attributes " + "FROM pose_info p "
-			+ "JOIN tag t ON p.pose_id = t.pose_id " + "JOIN tag_attribute ta ON t.attribute_id = ta.attribute_id "
+		"SELECT p.*, GROUP_CONCAT(ta.attribute ORDER BY ta.attribute_id ASC) AS tag_attributes FROM pose_info p "
+			+ "JOIN tag t ON p.pose_id = t.pose_id "
+			+ "JOIN tag_attribute ta ON t.attribute_id = ta.attribute_id "
 			+ "WHERE (:people_count < 5 AND p.people_count = :people_count) "
 			+ "OR (:people_count >= 5 AND p.people_count >= 5) "
-			+ "GROUP BY p.pose_id, p.image_key, p.source, p.source_url, p.people_count, p.frame_count, p.created_at, p.updated_at "
-			+ "ORDER BY RAND() " + "LIMIT 1", nativeQuery = true)
+			+ "GROUP BY p.pose_id "
+			+ "ORDER BY RAND() LIMIT 1", nativeQuery = true)
 	Optional<PoseInfo> findRandomPoseInfo(Long people_count);
 
 	// 	@Query(value = "SELECT * FROM tag_attribute", nativeQuery = true)
