@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 
 import com.dndoz.PosePicker.Global.entity.BaseEntity;
@@ -30,10 +31,13 @@ public class PoseInfo extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long poseId;
 	@Column(name = "people_count")
-	private Integer peopleCount;
+	private Long peopleCount;
 
 	@Column(name = "frame_count")
-	private Integer frameCount;
+	private Long frameCount;
+
+	@JoinColumn(name = "tag_attributes")
+	private String tagAttributes;
 
 	public Long getPoseId() {
 		return poseId;
@@ -55,12 +59,16 @@ public class PoseInfo extends BaseEntity {
 		return sourceUrl;
 	}
 
-	public Integer getPeopleCount() {
+	public Long getPeopleCount() {
 		return peopleCount;
 	}
 
-	public Integer getFrameCount() {
+	public Long getFrameCount() {
 		return frameCount;
 	}
 
+	public String getTagAttributes() {
+		return tagAttributes;
+	}
 }
+
