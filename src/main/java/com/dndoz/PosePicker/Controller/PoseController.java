@@ -3,6 +3,8 @@ package com.dndoz.PosePicker.Controller;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,8 @@ import com.dndoz.PosePicker.Dto.PoseTalkResponse;
 import com.dndoz.PosePicker.Service.PoseService;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -29,6 +33,7 @@ import io.swagger.annotations.ApiResponses;
 @RequestMapping("/api/pose")
 @Api(tags = {"포즈 API"})
 public class PoseController {
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private final PoseService poseService;
 
@@ -47,12 +52,12 @@ public class PoseController {
 		@ApiResponse(code = 401, message = "접근 권한이 없습니다.")})
 	@ApiOperation(value = "포즈 사진 상세 조회", notes = "사진 클릭 시 포즈 상세 정보")
 	public ResponseEntity<PoseInfoResponse> getPoseInfo(@PathVariable Long pose_id) {
+		logger.info("[getPoseInfo] 포즈 사진 상세 조회 요청");
 		try {
 			return ResponseEntity.ok(poseService.getPoseInfo(pose_id));
 		} catch (NoSuchElementException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item Not Found");
 		}
-
 	}
 
 	/**
@@ -65,6 +70,7 @@ public class PoseController {
 	@ApiResponse(code = 200, message = "포즈픽 데이터 전달 성공")
 	@ApiOperation(value = "포즈픽", notes = "포즈사진 랜덤픽")
 	public ResponseEntity<PoseInfoResponse> showRandomPoseInfo(@PathVariable Long people_count) {
+		logger.info("[showRandomPoseInfo] 포즈픽 데이터 요청");
 		try {
 			return ResponseEntity.ok(poseService.showRandomPoseInfo(people_count));
 		} catch (NoSuchElementException e) {
@@ -81,6 +87,7 @@ public class PoseController {
 	@ApiResponse(code = 200, message = "포즈톡 데이터 전달 성공")
 	@ApiOperation(value = "포즈톡", notes = "포즈단어 랜덤톡")
 	public ResponseEntity<PoseTalkResponse> findRandomPoseTalk() {
+		logger.info("[findRandomPoseTalk] 포즈톡 요청");
 		return ResponseEntity.ok(poseService.findRandomPoseTalk());
 	}
 
@@ -91,8 +98,9 @@ public class PoseController {
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping("/tags")
 	@ApiResponse(code = 200, message = "포즈 태그 리스트 전달 성공")
-	@ApiOperation(value = "포즈 태그", notes = "포즈 태그 리스트")
+	@ApiOperation(value = "포즈 태그", notes = "필터링 드롭다운에 표시되는 태그 정보 \n - 9개 제공(v.0.0.1)")
 	public ResponseEntity<PoseTagAttributeResponse> findPoseTagAttribute() {
+		logger.info("[findPoseTagAttribute] 포즈 태그 속성 정보 요청");
 		return ResponseEntity.ok(poseService.findPoseTagAttribute());
 	}
 
@@ -101,11 +109,11 @@ public class PoseController {
 	 * @return
 	 */
 	@GetMapping("/all")
-	@ApiResponse(code = 200, message = "포즈 피드 리스트 전달 성공")
-	@ApiOperation(value = "포즈 피드", notes = "포즈 피드 리스트")
+	@ApiResponse(code = 200, message = "전체 포즈 피드 리스트 전달 성공")
+	@ApiOperation(value = "포즈 피드", notes = "전체 포즈 피드 정보를 제공합니다.")
 	public ResponseEntity<Slice<PoseInfoResponse>> getPoses(@RequestParam final Integer pageNumber,
 		@RequestParam final Integer pageSize) {
-
+		logger.info("[getPoses] 포즈 태그 속성 정보 요청");
 		return ResponseEntity.ok(poseService.findPoses(pageNumber, pageSize));
 	}
 
@@ -114,14 +122,25 @@ public class PoseController {
 	 * @return
 	 */
 	@GetMapping()
-	@ApiResponse(code = 200, message = "포즈 피드 리스트 전달 성공")
-	@ApiOperation(value = "포즈 피드 필터링 데이터", notes = "포즈 피드 리스트")
+	@ApiOperation(value = "포즈 피드 필터링 데이터", notes = "필터링 정보를 함께 넘겨주세요.")
+	@ApiResponses({
+		@ApiResponse(code=200, message="포즈 피드 리스트 전달 성공")
+	})
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "pageNumber", value = "페이지 번호(default : 0)", dataType = "Integer"),
+		@ApiImplicitParam(name = "pageSize", value = "한 페이지당 사이즈", dataType = "Integer", readOnly = true),
+		@ApiImplicitParam(name = "peopleCount", value = "인원 수", dataType = "Long"),
+		@ApiImplicitParam(name = "frameCount", value = "프레임 수", dataType = "Long"),
+		@ApiImplicitParam(name = "tags", value = "태그", dataType = "List")
+
+	})
 	public ResponseEntity<PoseFeedResponse> getPoseFeed(
-		@RequestParam(name = "pageNumber", defaultValue = "0") final Integer pageNumber,
-		@RequestParam(name = "pageSize", defaultValue = "20") final Integer pageSize,
-		@RequestParam(name = "peopleCount", defaultValue = "0") final Long peopleCount,
-		@RequestParam(name = "frameCount", defaultValue = "0") final Long frameCount,
-		@RequestParam(name = "tags", defaultValue = "0") final List<String> tags) {
+		@RequestParam(value = "pageNumber", required = false) final Integer pageNumber,
+		@RequestParam(value = "pageSize", required = false) final Integer pageSize,
+		@RequestParam(value = "peopleCount", required = false) final Long peopleCount,
+		@RequestParam(value = "frameCount", required = false) final Long frameCount,
+		@RequestParam(value = "tags", required = false) final List<String> tags) {
+		logger.info("[getPoseFeed] 포즈 피드 리스트 요청");
 		return ResponseEntity.ok(poseService.getPoseFeed(pageNumber, pageSize, peopleCount, frameCount, tags));
 	}
 }
