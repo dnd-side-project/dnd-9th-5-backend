@@ -70,7 +70,7 @@ public class PoseService {
 	@Transactional(readOnly = true)
 	public PoseFeedResponse getPoseFeed(final Integer pageNumber, final Integer pageSize, final Long peopleCount,
 		final Long frameCount, final List<String> tags) {
-		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+		Pageable pageable = PageRequest.of(0, pageSize);
 		Slice<PoseInfoResponse> filteredContents;
 		Slice<PoseInfoResponse> recommendedContents;
 
@@ -78,10 +78,14 @@ public class PoseService {
 			.map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
 
 		if (filteredContents.getNumberOfElements() < 5) {
+			pageable = PageRequest.of(pageNumber, pageSize);
 			recommendedContents = poseInfoRepository.getRecommendedContents(pageable)
 				.map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
 			return new PoseFeedResponse(filteredContents, recommendedContents);
 		} else {
+			pageable = PageRequest.of(pageNumber, pageSize);
+			filteredContents = poseInfoRepository.findByFilter(pageable, peopleCount, frameCount, tags)
+				.map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
 			return new PoseFeedResponse(filteredContents);
 		}
 	}
