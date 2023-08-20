@@ -1,5 +1,7 @@
 package com.dndoz.PosePicker.Service;
 
+import com.dndoz.PosePicker.Auth.AuthTokens;
+import com.dndoz.PosePicker.Auth.AuthTokensGenerator;
 import com.dndoz.PosePicker.Domain.User;
 import com.dndoz.PosePicker.Dto.LoginResponse;
 import com.dndoz.PosePicker.Repository.UserRepository;
@@ -19,23 +21,26 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
+
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final AuthTokensGenerator authTokensGenerator;
 
     public LoginResponse kakaoLogin(String code) {
         // 1. "인가 코드"로 "액세스 토큰" 요청
         String accessToken = getAccessToken(code);
 
         // 2. 토큰으로 카카오 API 호출
-        LoginResponse kakaoUserInfo = getKakaoUserInfo(accessToken);
+        HashMap<String, Object> userInfo= getKakaoUserInfo(accessToken);
 
-        // 3. 카카오ID로 회원가입 처리
-        User kakaoUser = registerKakaoUserIfNeed(kakaoUserInfo);
+        //3. 카카오ID로 회원가입 & 로그인 처리
+        LoginResponse kakaoUserResponse= kakaoLogin(userInfo);
 
-        return kakaoUserInfo;
+        return kakaoUserResponse;
     }
 
     @Value("${kakao.key.client-id}")
@@ -44,7 +49,7 @@ public class UserService {
     private String redirectUri;
 
 
-    // "인가 코드"로 "액세스 토큰" 요청
+    //1. "인가 코드"로 "액세스 토큰" 요청
     private String getAccessToken(String code) {
 
         // HTTP Header 생성
@@ -80,8 +85,10 @@ public class UserService {
         return jsonNode.get("access_token").asText();
     }
 
-    //토큰으로 카카오 API 호출
-    private LoginResponse getKakaoUserInfo(String accessToken) {
+    //2. 토큰으로 카카오 API 호출
+    private HashMap<String, Object> getKakaoUserInfo(String accessToken) {
+        HashMap<String, Object> userInfo= new HashMap<String,Object>();
+
         // HTTP Header 생성
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);
@@ -112,25 +119,31 @@ public class UserService {
         String nickname = jsonNode.get("properties")
                 .get("nickname").asText();
 
-        return new LoginResponse(id, nickname, email);
+        userInfo.put("id",id);
+        userInfo.put("email",email);
+        userInfo.put("nickname",nickname);
+
+        return userInfo;
     }
 
-    // 카카오ID로 회원가입 처리
-    private User registerKakaoUserIfNeed(LoginResponse kakaoUserInfo) {
-        // DB 에 중복된 email이 있는지 확인
-        Long kakaoId=kakaoUserInfo.getId();
-        String kakaoEmail = kakaoUserInfo.getEmail();
-        String nickName = kakaoUserInfo.getNickname();
+    //3. 카카오ID로 회원가입 & 로그인 처리
+    private LoginResponse kakaoLogin(HashMap<String, Object> userInfo){
+        Long uid=null;
+        Long kakaoId= Long.valueOf(userInfo.get("id").toString());
+        String kakaoEmail = userInfo.get("email").toString();
+        String nickName = userInfo.get("nickname").toString();
+
         User kakaoUser = userRepository.findByEmail(kakaoEmail)
                 .orElse(null);
 
-        // 회원가입
-        if (kakaoUser == null) {
+        if (kakaoUser == null) {    //회원가입
             kakaoUser = new User(kakaoId, nickName, kakaoEmail);
-            userRepository.save(kakaoUser);
+            uid=userRepository.save(kakaoUser).getUid();
         }
 
-        return kakaoUser;
+        //토큰 생성
+        AuthTokens token=authTokensGenerator.generate(kakaoEmail);
+        return new LoginResponse(uid,nickName,kakaoEmail,token);
     }
-    
+
 }
