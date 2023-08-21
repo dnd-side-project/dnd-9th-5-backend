@@ -38,7 +38,7 @@ public class UserService {
         HashMap<String, Object> userInfo= getKakaoUserInfo(accessToken);
 
         //3. 카카오ID로 회원가입 & 로그인 처리
-        LoginResponse kakaoUserResponse= kakaoLogin(userInfo);
+        LoginResponse kakaoUserResponse= kakaoUserLogin(userInfo);
 
         return kakaoUserResponse;
     }
@@ -127,9 +127,9 @@ public class UserService {
     }
 
     //3. 카카오ID로 회원가입 & 로그인 처리
-    private LoginResponse kakaoLogin(HashMap<String, Object> userInfo){
-        Long uid=null;
-        Long kakaoId= Long.valueOf(userInfo.get("id").toString());
+    private LoginResponse kakaoUserLogin(HashMap<String, Object> userInfo){
+
+        Long uid= Long.valueOf(userInfo.get("id").toString());
         String kakaoEmail = userInfo.get("email").toString();
         String nickName = userInfo.get("nickname").toString();
 
@@ -137,8 +137,8 @@ public class UserService {
                 .orElse(null);
 
         if (kakaoUser == null) {    //회원가입
-            kakaoUser = new User(kakaoId, nickName, kakaoEmail);
-            uid=userRepository.save(kakaoUser).getUid();
+            kakaoUser = new User(uid, nickName, kakaoEmail);
+            userRepository.save(kakaoUser);
         }
 
         //토큰 생성

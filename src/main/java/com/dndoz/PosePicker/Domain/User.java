@@ -13,7 +13,7 @@ import javax.persistence.*;
 @ApiModel(value="사용자 모델: User")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="uid")
     private Long uid;
 
     @Column(name = "nickname")
@@ -21,7 +21,6 @@ public class User {
 
     @Column(name = "email")
     String email;
-
 
     public User(Long uid, String nickname, String email){
         this.uid=uid;
