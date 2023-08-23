@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.dndoz.PosePicker.Domain.PoseInfo;
 import com.dndoz.PosePicker.Domain.PoseTagAttribute;
 import com.dndoz.PosePicker.Domain.PoseTalk;
+import com.dndoz.PosePicker.Dto.PoseFeedRequest;
 import com.dndoz.PosePicker.Dto.PoseFeedResponse;
 import com.dndoz.PosePicker.Dto.PoseInfoResponse;
 import com.dndoz.PosePicker.Dto.PoseTagAttributeResponse;
@@ -68,26 +69,26 @@ public class PoseService {
 	}
 
 	@Transactional(readOnly = true)
-	public PoseFeedResponse getPoseFeed(final Integer pageNumber, final Integer pageSize, final Long peopleCount,
-		final Long frameCount, final List<String> tags) {
-		Pageable pageable = PageRequest.of(0, pageSize);
+	public PoseFeedResponse getPoseFeed(final PoseFeedRequest poseFeedRequest) {
+		Pageable pageable = PageRequest.of(poseFeedRequest.getPageNumber(), poseFeedRequest.getPageSize());
 		Slice<PoseInfoResponse> filteredContents;
 		Slice<PoseInfoResponse> recommendedContents;
 
-		filteredContents = poseInfoRepository.findByFilter(pageable, peopleCount, frameCount, tags)
+		Integer filteredContentsCount = poseInfoRepository.findByFilteredContentsCount(poseFeedRequest.getPeopleCount(),
+			poseFeedRequest.getFrameCount(), poseFeedRequest.getTags());
+
+		filteredContents = poseInfoRepository.findByFilter(pageable, poseFeedRequest.getPeopleCount(),
+				poseFeedRequest.getFrameCount(), poseFeedRequest.getTags())
 			.map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
 
-		if (filteredContents.getNumberOfElements() < 5) {
-			pageable = PageRequest.of(pageNumber, pageSize);
+		if (filteredContentsCount < 5) {
 			recommendedContents = poseInfoRepository.getRecommendedContents(pageable)
 				.map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
 			return new PoseFeedResponse(filteredContents, recommendedContents);
-		} else {
-			pageable = PageRequest.of(pageNumber, pageSize);
-			filteredContents = poseInfoRepository.findByFilter(pageable, peopleCount, frameCount, tags)
-				.map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
-			return new PoseFeedResponse(filteredContents);
+
 		}
+		return new PoseFeedResponse(filteredContents);
+
 	}
 
 }
