@@ -112,11 +112,8 @@ public class PoseController {
 	 */
 	@GetMapping()
 	@ApiOperation(value = "포즈 피드 필터링 데이터", notes = "필터링 정보를 함께 넘겨주세요.")
-	@ApiResponses({
-		@ApiResponse(code=200, message="포즈 피드 리스트 전달 성공")
-	})
-	@ApiImplicitParams({
-		@ApiImplicitParam(name = "pageNumber", value = "페이지 번호(default : 0)", dataType = "Integer"),
+	@ApiResponses({@ApiResponse(code = 200, message = "포즈 피드 리스트 전달 성공")})
+	@ApiImplicitParams({@ApiImplicitParam(name = "pageNumber", value = "페이지 번호(default : 0)", dataType = "Integer"),
 		@ApiImplicitParam(name = "peopleCount", value = "인원 수", dataType = "Long"),
 		@ApiImplicitParam(name = "frameCount", value = "프레임 수", dataType = "Long"),
 		@ApiImplicitParam(name = "tags", value = "태그", dataType = "List")
@@ -125,11 +122,12 @@ public class PoseController {
 	public ResponseEntity<PoseFeedResponse> getPoseFeed(
 		@RequestParam(value = "pageNumber", required = false) final Integer pageNumber,
 		@RequestParam(value = "peopleCount", required = false) final Long peopleCount,
-		@RequestParam(value = "frameCount", required = false, defaultValue = "20") final Long frameCount,
+		@RequestParam(value = "frameCount", required = false) final Long frameCount,
 		@RequestParam(value = "tags", required = false) final String tags) {
 		logger.info("[getPoseFeed] 포즈 피드 리스트 요청");
 
-		return ResponseEntity.ok(poseService.getPoseFeed(new PoseFeedRequest(pageNumber, peopleCount, frameCount, tags)));
+		return ResponseEntity.ok(
+			poseService.getPoseFeed(new PoseFeedRequest(pageNumber, peopleCount, frameCount, tags)));
 	}
 }
 

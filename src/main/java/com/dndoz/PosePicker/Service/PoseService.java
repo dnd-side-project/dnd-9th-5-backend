@@ -17,6 +17,7 @@ import com.dndoz.PosePicker.Dto.PoseFeedResponse;
 import com.dndoz.PosePicker.Dto.PoseInfoResponse;
 import com.dndoz.PosePicker.Dto.PoseTagAttributeResponse;
 import com.dndoz.PosePicker.Dto.PoseTalkResponse;
+import com.dndoz.PosePicker.Repository.PoseFilterRepository;
 import com.dndoz.PosePicker.Repository.PoseInfoRepository;
 import com.dndoz.PosePicker.Repository.PoseTagAttributeRepository;
 import com.dndoz.PosePicker.Repository.PoseTalkRepository;
@@ -26,27 +27,30 @@ import com.dndoz.PosePicker.Repository.PoseTalkRepository;
 public class PoseService {
 	private final PoseInfoRepository poseInfoRepository;
 	private final PoseTalkRepository poseTalkRepository;
+	private final PoseFilterRepository poseFilterRepository;
 	private final PoseTagAttributeRepository poseTagAttributeRepository;
 
 	@Value("${aws.image_url.prefix}")
 	private String urlPrefix;
 
 	public PoseService(final PoseInfoRepository poseInfoRepository, final PoseTalkRepository poseTalkRepository,
-		final PoseTagAttributeRepository poseTagAttributeRepository) {
+		final PoseFilterRepository poseFilterRepository, final PoseTagAttributeRepository poseTagAttributeRepository) {
 		this.poseInfoRepository = poseInfoRepository;
 		this.poseTalkRepository = poseTalkRepository;
+		this.poseFilterRepository = poseFilterRepository;
 		this.poseTagAttributeRepository = poseTagAttributeRepository;
 	}
 
 	//포즈 이미지 상세 조회
 	public PoseInfoResponse getPoseInfo(Long pose_id) {
-		PoseInfo poseInfo = poseInfoRepository.findByPoseId(pose_id).orElseThrow(NullPointerException::new);
+		PoseInfo poseInfo = poseFilterRepository.findByPoseId(pose_id).orElseThrow(NullPointerException::new);
 		return new PoseInfoResponse(urlPrefix, poseInfo);
 	}
 
 	//포즈픽(사진) 조회
 	public PoseInfoResponse showRandomPoseInfo(Long people_count) {
-		PoseInfo poseInfo = poseInfoRepository.findRandomPoseInfo(people_count).orElseThrow(NullPointerException::new);
+		PoseInfo poseInfo = poseFilterRepository.findRandomPoseInfo(people_count)
+			.orElseThrow(NullPointerException::new);
 		return new PoseInfoResponse(urlPrefix, poseInfo);
 	}
 
@@ -74,19 +78,19 @@ public class PoseService {
 		Slice<PoseInfoResponse> filteredContents;
 		Slice<PoseInfoResponse> recommendedContents;
 
-		Integer filteredContentsCount = poseInfoRepository.findByFilteredContentsCount(poseFeedRequest.getPeopleCount(),
+		Boolean getRecommendationCheck = poseFilterRepository.getRecommendationCheck(poseFeedRequest.getPeopleCount(),
 			poseFeedRequest.getFrameCount(), poseFeedRequest.getTags());
 
-		filteredContents = poseInfoRepository.findByFilter(pageable, poseFeedRequest.getPeopleCount(),
+		filteredContents = poseFilterRepository.findByFilter(pageable, poseFeedRequest.getPeopleCount(),
 				poseFeedRequest.getFrameCount(), poseFeedRequest.getTags())
 			.map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
 
-		if (filteredContentsCount < 5) {
-			recommendedContents = poseInfoRepository.getRecommendedContents(pageable)
+		if (getRecommendationCheck) {
+			recommendedContents = poseFilterRepository.getRecommendedContents(pageable)
 				.map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
 			return new PoseFeedResponse(filteredContents, recommendedContents);
-
 		}
+
 		return new PoseFeedResponse(filteredContents);
 
 	}
