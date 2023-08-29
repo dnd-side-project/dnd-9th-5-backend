@@ -75,16 +75,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     *
-     * Not Found Image -> Entity X, httpStatus code = 204
-     * client process : To load default image
-     */
     @ExceptionHandler(NullPointerException.class)
-    protected ResponseEntity<StatusResponse> handleException(NullPointerException e) {
+    protected ResponseEntity<ErrorResponse> handleException(NullPointerException e) {
         log.error("NullPointerException", e);
-        final StatusResponse response = new StatusResponse(StatusCode.NO_CONTENT);
-        return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.ENTITY_NOT_FOUND);
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

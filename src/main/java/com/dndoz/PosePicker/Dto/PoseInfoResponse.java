@@ -13,6 +13,10 @@ public class PoseInfoResponse {
 
 	}
 
+	public PoseInfoResponse(final PoseInfo poseInfo) {
+		this.poseInfo = poseInfo;
+	}
+
 	public PoseInfoResponse(final String urlPrefix, final PoseInfo poseInfo) {
 		poseInfo.setImageKey(urlPrefix + poseInfo.getImageKey());
 

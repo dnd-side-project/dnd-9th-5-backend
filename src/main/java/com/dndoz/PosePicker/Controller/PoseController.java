@@ -1,8 +1,5 @@
 package com.dndoz.PosePicker.Controller;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Slice;
@@ -14,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
+import com.dndoz.PosePicker.Dto.PoseFeedRequest;
 import com.dndoz.PosePicker.Dto.PoseFeedResponse;
 import com.dndoz.PosePicker.Dto.PoseInfoResponse;
 import com.dndoz.PosePicker.Dto.PoseTagAttributeResponse;
@@ -53,11 +50,7 @@ public class PoseController {
 	@ApiOperation(value = "포즈 사진 상세 조회", notes = "사진 클릭 시 포즈 상세 정보")
 	public ResponseEntity<PoseInfoResponse> getPoseInfo(@PathVariable Long pose_id) {
 		logger.info("[getPoseInfo] 포즈 사진 상세 조회 요청");
-		try {
-			return ResponseEntity.ok(poseService.getPoseInfo(pose_id));
-		} catch (NoSuchElementException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item Not Found");
-		}
+		return ResponseEntity.ok(poseService.getPoseInfo(pose_id));
 	}
 
 	/**
@@ -71,11 +64,7 @@ public class PoseController {
 	@ApiOperation(value = "포즈픽", notes = "포즈사진 랜덤픽")
 	public ResponseEntity<PoseInfoResponse> showRandomPoseInfo(@PathVariable Long people_count) {
 		logger.info("[showRandomPoseInfo] 포즈픽 데이터 요청");
-		try {
-			return ResponseEntity.ok(poseService.showRandomPoseInfo(people_count));
-		} catch (NoSuchElementException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item Not Found");
-		}
+		return ResponseEntity.ok(poseService.showRandomPoseInfo(people_count));
 	}
 
 	/**
@@ -123,12 +112,8 @@ public class PoseController {
 	 */
 	@GetMapping()
 	@ApiOperation(value = "포즈 피드 필터링 데이터", notes = "필터링 정보를 함께 넘겨주세요.")
-	@ApiResponses({
-		@ApiResponse(code=200, message="포즈 피드 리스트 전달 성공")
-	})
-	@ApiImplicitParams({
-		@ApiImplicitParam(name = "pageNumber", value = "페이지 번호(default : 0)", dataType = "Integer"),
-		@ApiImplicitParam(name = "pageSize", value = "한 페이지당 사이즈", dataType = "Integer", readOnly = true),
+	@ApiResponses({@ApiResponse(code = 200, message = "포즈 피드 리스트 전달 성공")})
+	@ApiImplicitParams({@ApiImplicitParam(name = "pageNumber", value = "페이지 번호(default : 0)", dataType = "Integer"),
 		@ApiImplicitParam(name = "peopleCount", value = "인원 수", dataType = "Long"),
 		@ApiImplicitParam(name = "frameCount", value = "프레임 수", dataType = "Long"),
 		@ApiImplicitParam(name = "tags", value = "태그", dataType = "List")
@@ -136,12 +121,13 @@ public class PoseController {
 	})
 	public ResponseEntity<PoseFeedResponse> getPoseFeed(
 		@RequestParam(value = "pageNumber", required = false) final Integer pageNumber,
-		@RequestParam(value = "pageSize", required = false) final Integer pageSize,
 		@RequestParam(value = "peopleCount", required = false) final Long peopleCount,
 		@RequestParam(value = "frameCount", required = false) final Long frameCount,
-		@RequestParam(value = "tags", required = false) final List<String> tags) {
+		@RequestParam(value = "tags", required = false) final String tags) {
 		logger.info("[getPoseFeed] 포즈 피드 리스트 요청");
-		return ResponseEntity.ok(poseService.getPoseFeed(pageNumber, pageSize, peopleCount, frameCount, tags));
+
+		return ResponseEntity.ok(
+			poseService.getPoseFeed(new PoseFeedRequest(pageNumber, peopleCount, frameCount, tags)));
 	}
 }
 
