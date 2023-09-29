@@ -1,11 +1,13 @@
 package com.dndoz.PosePicker.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +34,9 @@ public class PoseService {
 
 	@Value("${aws.image_url.prefix}")
 	private String urlPrefix;
+
+	private List<PoseInfo> filteredPoseInfo;
+	private List<PoseInfo> recommendedPoseInfo;
 
 	public PoseService(final PoseInfoRepository poseInfoRepository, final PoseTalkRepository poseTalkRepository,
 		final PoseFilterRepository poseFilterRepository, final PoseTagAttributeRepository poseTagAttributeRepository) {
@@ -76,18 +81,48 @@ public class PoseService {
 	public PoseFeedResponse getPoseFeed(final PoseFeedRequest poseFeedRequest) {
 		Pageable pageable = PageRequest.of(poseFeedRequest.getPageNumber(), poseFeedRequest.getPageSize());
 		Slice<PoseInfoResponse> filteredContents;
+		Slice<PoseInfo> slicedFilteredPoseInfo;
+		List<PoseInfo> slicedFilteredResult;
 		Slice<PoseInfoResponse> recommendedContents;
+		Slice<PoseInfo> slicedRecommenededPoseInfo;
+		List<PoseInfo> slicedRecommenededResult;
+
+		System.out.println("12123");
 
 		Boolean getRecommendationCheck = poseFilterRepository.getRecommendationCheck(poseFeedRequest.getPeopleCount(),
 			poseFeedRequest.getFrameCount(), poseFeedRequest.getTags());
 
-		filteredContents = poseFilterRepository.findByFilter(pageable, poseFeedRequest.getPeopleCount(),
-				poseFeedRequest.getFrameCount(), poseFeedRequest.getTags())
-			.map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
+		if (poseFeedRequest.getPageNumber() == 0) {
+			filteredPoseInfo = poseFilterRepository.findByFilter(pageable, poseFeedRequest.getPeopleCount(),
+				poseFeedRequest.getFrameCount(), poseFeedRequest.getTags());
+		}
+
+		Integer endIdx = Math.min(filteredPoseInfo.size(), (int)pageable.getOffset() + pageable.getPageSize());
+
+		if ((int)pageable.getOffset() >= endIdx) {
+			slicedFilteredResult = new ArrayList<>();
+		} else {
+			slicedFilteredResult = filteredPoseInfo.subList((int)pageable.getOffset(), endIdx);
+		}
+
+		slicedFilteredPoseInfo =  new SliceImpl<>(slicedFilteredResult, pageable, slicedFilteredResult.size() == pageable.getPageSize());
+		filteredContents = slicedFilteredPoseInfo.map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
 
 		if (getRecommendationCheck) {
-			recommendedContents = poseFilterRepository.getRecommendedContents(pageable)
-				.map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
+			if (poseFeedRequest.getPageNumber() == 0) {
+				recommendedPoseInfo = poseFilterRepository.getRecommendedContents(pageable);
+			}
+
+			endIdx = Math.min(recommendedPoseInfo.size(), (int)pageable.getOffset() + pageable.getPageSize());
+
+			if ((int)pageable.getOffset() >= endIdx) {
+				slicedRecommenededResult = new ArrayList<>();
+			} else {
+				slicedRecommenededResult = recommendedPoseInfo.subList((int)pageable.getOffset(), endIdx);
+			}
+
+			slicedRecommenededPoseInfo = new SliceImpl<>(slicedRecommenededResult, pageable, slicedRecommenededResult.size() == pageable.getPageSize());
+			recommendedContents = slicedRecommenededPoseInfo.map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
 			return new PoseFeedResponse(filteredContents, recommendedContents);
 		}
 

@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModel;
 @ApiModel(value = "포즈 피드 리스트 응답: PoseFeedRequest")
 public class PoseFeedRequest {
 	private Integer pageNumber = 0;
-	private Integer pageSize = 20;
+	private Integer pageSize = 8;
 	private Long peopleCount = 0L;
 	private Long frameCount = 0L;
 	private String tags;

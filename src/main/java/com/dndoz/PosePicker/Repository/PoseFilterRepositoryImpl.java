@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 
 import com.dndoz.PosePicker.Domain.PoseInfo;
 import com.dndoz.PosePicker.Domain.QPoseInfo;
@@ -63,8 +61,10 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 
 		PoseInfo randomPoseInfo = queryFactory
 			.selectFrom(qPoseInfo)
-			.where(people_count < 5 ? qPoseInfo.peopleCount.eq(people_count) : qPoseInfo.peopleCount.goe(5))
-			.orderBy(qPoseInfo.poseId.asc())
+			.where(
+				eqPeopleCount(qPoseInfo, people_count)
+			)
+			.orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc())
 			.fetchFirst();
 
 		List<String> attributes = queryFactory.select(qPoseTagAttribute.attribute)
@@ -93,7 +93,7 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 				eqPeopleCount(qPoseInfo, people_count),
 				eqFrameCount(qPoseInfo, frame_count)
 			)
-			.orderBy(qPoseInfo.poseId.asc())
+			.orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc())
 			.fetch();
 
 		List<String> tagsCondition = Arrays.asList(tags.split(","));
@@ -120,11 +120,10 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 	}
 
 	@Override
-	public Slice<PoseInfo> findByFilter(Pageable pageable, Long people_count, Long frame_count, String tags) {
+	public List<PoseInfo> findByFilter(Pageable pageable, Long people_count, Long frame_count, String tags) {
 		QPoseInfo qPoseInfo = QPoseInfo.poseInfo;
 		QPoseTag qPoseTag = QPoseTag.poseTag;
 		QPoseTagAttribute qPoseTagAttribute = QPoseTagAttribute.poseTagAttribute;
-		List<PoseInfo> slicedResult;
 
 		List<PoseInfo> poseInfoList = queryFactory
 			.selectFrom(qPoseInfo)
@@ -132,10 +131,11 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 				eqPeopleCount(qPoseInfo, people_count),
 				eqFrameCount(qPoseInfo, frame_count)
 			)
-			.orderBy(qPoseInfo.poseId.asc())
+			.orderBy(new OrderSpecifier<>(Order.ASC, Expressions.numberTemplate(Double.class, "rand()")))
 			.fetch();
 
 		List<String> tagsCondition = Arrays.asList(tags.split(","));
+
 		List<PoseInfo> result = new ArrayList<>();
 		for (PoseInfo pi : poseInfoList) {
 			List<String> attributes = queryFactory.select(qPoseTagAttribute.attribute)
@@ -155,19 +155,11 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 
 		}
 
-		Integer endIdx = Math.min(result.size(), (int)pageable.getOffset() + pageable.getPageSize());
-
-		if ((int)pageable.getOffset() >= endIdx) {
-			slicedResult = new ArrayList<>();
-		} else {
-			slicedResult = result.subList((int)pageable.getOffset(), endIdx);
-		}
-
-		return new SliceImpl<>(slicedResult, pageable, slicedResult.size() == pageable.getPageSize());
+		return result;
 	}
 
 	@Override
-	public Slice<PoseInfo> getRecommendedContents(Pageable pageable) {
+	public List<PoseInfo> getRecommendedContents(Pageable pageable) {
 		QPoseInfo qPoseInfo = QPoseInfo.poseInfo;
 		QPoseTag qPoseTag = QPoseTag.poseTag;
 		QPoseTagAttribute qPoseTagAttribute = QPoseTagAttribute.poseTagAttribute;
@@ -176,8 +168,6 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 			.selectFrom(qPoseInfo)
 			.groupBy(qPoseInfo.poseId)
 			.orderBy(new OrderSpecifier<>(Order.ASC, Expressions.numberTemplate(Double.class, "rand()")))
-			.offset(pageable.getOffset())
-			.limit(pageable.getPageSize())
 			.fetch();
 
 		List<PoseInfo> result = new ArrayList<>();
@@ -195,14 +185,14 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 			result.add(poseInfo);
 		}
 
-		return new SliceImpl<>(result, pageable, result.size() == pageable.getPageSize());
+		return result;
 	}
 
 	private BooleanExpression eqPeopleCount(QPoseInfo qPoseInfo, Long people_count) {
 		if (people_count == null || people_count == 0) {
 			return null;
 		}
-		return qPoseInfo.peopleCount.eq(people_count);
+		return people_count < 5 ? qPoseInfo.peopleCount.eq(people_count) : qPoseInfo.peopleCount.goe(5);
 	}
 
 	private BooleanExpression eqFrameCount(QPoseInfo qPoseInfo, Long frame_count) {
