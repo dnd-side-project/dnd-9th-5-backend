@@ -11,4 +11,6 @@ import com.dndoz.PosePicker.Domain.User;
 public interface BookmarkRepository extends JpaRepository<Bookmark,Long> {
 	//북마크 여부 확인
 	Optional<Object> findByUserAndPoseInfo(User user, PoseInfo poseInfo);
+	//북마크 삭제
+	void deleteByUserAndPoseInfo(User user, PoseInfo poseInfo);
 }
