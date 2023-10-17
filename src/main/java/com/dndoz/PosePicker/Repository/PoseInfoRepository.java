@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.dndoz.PosePicker.Domain.PoseInfo;
@@ -45,5 +46,25 @@ public interface PoseInfoRepository extends JpaRepository<PoseInfo, Long> {
 			+ "JOIN tag t ON p.pose_id = t.pose_id " + "JOIN tag_attribute ta ON t.attribute_id = ta.attribute_id "
 			+ "GROUP BY p.pose_id " + "ORDER BY  RAND() ", nativeQuery = true)
 	Slice<PoseInfo> getRecommendedContents(Pageable pageable);
+
+
+
+	//사용자의 북마크 정보 리스트 찾기
+	@Query(value =
+		"SELECT p.*, GROUP_CONCAT(ta.attribute ORDER BY ta.attribute_id ASC) AS t_tag_attributes FROM pose_info p "
+			+ "JOIN tag t ON p.pose_id = t.pose_id " + "JOIN tag_attribute ta ON t.attribute_id = ta.attribute_id "
+			+ "JOIN bookmark b ON b.pose_id = p.pose_id "
+			+ "WHERE b.uid = :uid "
+			+ "GROUP BY p.pose_id ", nativeQuery = true)
+	List<PoseInfo> findBookmark(@Param("uid") String uid);
+
+	// 북마크 페이징
+	// @Query(value =
+	// 	"SELECT p.*, GROUP_CONCAT(ta.attribute ORDER BY ta.attribute_id ASC) AS t_tag_attributes FROM pose_info p "
+	// 		+ "JOIN tag t ON p.pose_id = t.pose_id " + "JOIN tag_attribute ta ON t.attribute_id = ta.attribute_id "
+	// 		+ "JOIN bookmark b ON b.pose_id = p.pose_id "
+	// 		+ "WHERE b.uid = :uid "
+	// 		+ "GROUP BY p.pose_id ", nativeQuery = true)
+	// Slice<PoseInfo> findBookmark(@Param("uid") String uid, Pageable pageable);
 
 }

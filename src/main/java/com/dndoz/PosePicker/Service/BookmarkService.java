@@ -1,5 +1,9 @@
 package com.dndoz.PosePicker.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -7,6 +11,7 @@ import com.dndoz.PosePicker.Domain.Bookmark;
 import com.dndoz.PosePicker.Domain.PoseInfo;
 import com.dndoz.PosePicker.Domain.User;
 import com.dndoz.PosePicker.Dto.BookmarkRequest;
+import com.dndoz.PosePicker.Dto.PoseInfoResponse;
 import com.dndoz.PosePicker.Repository.BookmarkRepository;
 import com.dndoz.PosePicker.Repository.PoseInfoRepository;
 import com.dndoz.PosePicker.Repository.UserRepository;
@@ -20,6 +25,9 @@ public class BookmarkService{
 	private final BookmarkRepository bookmarkRepository;
 	private final UserRepository userRepository;
 	private final PoseInfoRepository poseInfoRepository;
+
+	@Value("${aws.image_url.prefix}")
+	private String urlPrefix;
 
 	//북마크 등록
 	@Transactional
@@ -48,5 +56,19 @@ public class BookmarkService{
 			throw new Exception();
 		}
 	}
+
+	//북마크 피드 리스트
+	@Transactional(readOnly = true)
+	public List<PoseInfoResponse> findBookmark(final String uid) {
+			return poseInfoRepository.findBookmark(uid).stream().map(poseInfo -> new PoseInfoResponse(urlPrefix,poseInfo))
+				.collect(Collectors.toList());
+	}
+
+	// 북마크 무한 스크롤 ver.
+	// @Transactional(readOnly = true)
+	// public Slice<PoseInfoResponse> findBookmark(final String uid, final Integer pageNumber, final Integer pageSize) {
+	// 	Pageable pageable = PageRequest.of(pageNumber, pageSize);
+	// 	return poseInfoRepository.findBookmark(uid,pageable).map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
+	// }
 
 }
