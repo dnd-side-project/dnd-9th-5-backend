@@ -9,7 +9,7 @@ import com.dndoz.PosePicker.Domain.PoseTagAttribute;
 
 public interface PoseTagAttributeRepository extends JpaRepository<PoseTagAttribute, Long> {
 
-	@Query(value = "SELECT * FROM tag_attribute LIMIT 9", nativeQuery = true)
+	@Query(value = "SELECT * FROM tag_attribute LIMIT 10 OFFSET 1", nativeQuery = true)
 	List<PoseTagAttribute> findPoseTagAttribute();
 
 }
