@@ -29,8 +29,8 @@ public class S3UploadService {
 
 				String fileType=(multipartFile.getContentType()).substring(6);  //ex) image/png -> png
 
-				String uploadFileName = imgDto.getFrameCount()+"[PZ]"+imgDto.getFrameCount()+"[PZ]"+imgDto.getTags()+"[PZ]"
-					+imgDto.getSource()+"[PZ]"+imgDto.getSourceUrl()+"[PZ]"+imgDto.getDescription()+"."+fileType;
+				String uploadFileName = imgDto.getFrameCount()+"[pz]"+imgDto.getFrameCount()+"[pz]"+imgDto.getTags()+"[pz]"
+					+imgDto.getSource()+"[pz]"+imgDto.getSourceUrl()+"[pz]"+imgDto.getDescription()+"."+fileType;
 
 				amazonS3Client.putObject(bucketName, uploadFileName, multipartFile.getInputStream(), metadata);
 				return amazonS3Client.getUrl(bucketName, uploadFileName).toString();
