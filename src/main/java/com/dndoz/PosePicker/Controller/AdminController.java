@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.dndoz.PosePicker.Dto.ImgUploadRequest;
-import com.dndoz.PosePicker.Service.S3UploadService;
+import com.dndoz.PosePicker.Service.AdminService;
 
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +20,9 @@ import lombok.RequiredArgsConstructor;
 @Controller
 @RequestMapping("/api/imgUpload")
 @Api(tags = {"이미지 업로드 API"})
-public class S3UploadController {
+public class AdminController {
 
-	private final S3UploadService uploadService;
+	private final AdminService uploadService;
 
 	@PostMapping("/")
 	public ResponseEntity<?> uploadData(

@@ -13,7 +13,7 @@ import com.dndoz.PosePicker.Dto.ImgUploadRequest;
 
 @Service
 @RequiredArgsConstructor
-public class S3UploadService {
+public class AdminService {
 
 	   private final AmazonS3Client amazonS3Client;
 
