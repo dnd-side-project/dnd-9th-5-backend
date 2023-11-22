@@ -28,7 +28,7 @@ public class AdminController {
 	public ResponseEntity<?> uploadData(
 		@RequestPart(value = "imgDto") ImgUploadRequest imgDto,
 		@RequestPart(value = "file") MultipartFile multipartFile) throws IOException {
-		return ResponseEntity.status(HttpStatus.CREATED).body(uploadService.uploadFile(imgDto, multipartFile));
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
 }
