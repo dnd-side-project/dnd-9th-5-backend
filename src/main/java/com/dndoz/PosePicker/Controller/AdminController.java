@@ -15,20 +15,29 @@ import com.dndoz.PosePicker.Service.AdminService;
 
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
+import springfox.documentation.annotations.ApiIgnore;
 
 @RequiredArgsConstructor
 @Controller
-@RequestMapping("/api/imgUpload")
+@RequestMapping("/api/admin")
 @Api(tags = {"이미지 업로드 API"})
+@ApiIgnore
 public class AdminController {
 
 	private final AdminService uploadService;
 
-	@PostMapping("/")
+	@PostMapping("/imgUpload")
 	public ResponseEntity<?> uploadData(
-		@RequestPart(value = "imgDto") ImgUploadRequest imgDto,
+		@RequestPart(value = "peopleCount") String peopleCount,
+		@RequestPart(value = "frameCount") String frameCount,
+		@RequestPart(value = "tags") String tags,
+		@RequestPart(value = "source") String source,
+		@RequestPart(value = "sourceUrl") String sourceUrl,
+		@RequestPart(value = "description") String description,
 		@RequestPart(value = "file") MultipartFile multipartFile) throws IOException {
-		return ResponseEntity.status(HttpStatus.CREATED).build();
+		ImgUploadRequest imgUploadRequest = new ImgUploadRequest(peopleCount, frameCount, tags, source, sourceUrl, description);
+		uploadService.uploadFile(imgUploadRequest, multipartFile);
+		return ResponseEntity.status(HttpStatus.CREATED).build(		);
 	}
 
 }

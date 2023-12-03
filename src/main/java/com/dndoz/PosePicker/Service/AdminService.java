@@ -30,8 +30,9 @@ public class AdminService {
 				String fileType=(multipartFile.getContentType()).substring(6);  //ex) image/png -> png
 
 				String uploadFileName = imgDto.getFrameCount()+"[pz]"+imgDto.getFrameCount()+"[pz]"+imgDto.getTags()+"[pz]"
-					+imgDto.getSource()+"[pz]"+imgDto.getSourceUrl()+"[pz]"+imgDto.getDescription()+"."+fileType;
+					+imgDto.getSource()+"[pz]"+imgDto.getSourceUrl()+"[pz]"+imgDto.getDescription()+".jpg";
 
+				System.out.println(uploadFileName);
 				amazonS3Client.putObject(bucketName, uploadFileName, multipartFile.getInputStream(), metadata);
 				return amazonS3Client.getUrl(bucketName, uploadFileName).toString();
 			}
