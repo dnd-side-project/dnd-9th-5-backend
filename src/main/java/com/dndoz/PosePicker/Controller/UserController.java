@@ -3,6 +3,7 @@ package com.dndoz.PosePicker.Controller;
 import com.dndoz.PosePicker.Dto.KakaoLoginRequest;
 import com.dndoz.PosePicker.Dto.LoginResponse;
 import com.dndoz.PosePicker.Dto.PPTokenResponse;
+import com.dndoz.PosePicker.Service.AppleService;
 import com.dndoz.PosePicker.Service.KakaoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,6 +23,7 @@ import java.util.NoSuchElementException;
 public class UserController {
 
     private final KakaoService kakaoService;
+    private final AppleService appleService;
 
 	//web 버전
     @ResponseBody
@@ -51,6 +53,17 @@ public class UserController {
 			return ResponseEntity.ok(kakaoService.iosKakaoLogin(loginRequest));
 		} catch (NoSuchElementException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Exception");
+		}
+	}
+
+	@ResponseBody
+	@GetMapping("/login/ios/apple/")
+	@ApiOperation(value = "ios 애플 로그인", notes = "ios 버전 애플 로그인")
+	public ResponseEntity<LoginResponse> appleLogin(@RequestParam String idToken){
+		try{
+			return ResponseEntity.ok(appleService.appleLogin(idToken));
+		} catch (NoSuchElementException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Item Not Found");
 		}
 	}
 

@@ -23,4 +23,6 @@ public class User {
 	@Column(name = "loginType")
 	String loginType;
 
+	@Column(name = "iosId")
+	String iosId;
 }
