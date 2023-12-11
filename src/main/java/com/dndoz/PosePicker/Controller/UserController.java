@@ -1,7 +1,8 @@
 package com.dndoz.PosePicker.Controller;
 
+import com.dndoz.PosePicker.Dto.KakaoLoginRequest;
 import com.dndoz.PosePicker.Dto.LoginResponse;
-import com.dndoz.PosePicker.Service.AppleService;
+import com.dndoz.PosePicker.Dto.PPTokenResponse;
 import com.dndoz.PosePicker.Service.KakaoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,6 +34,25 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Item Not Found");
         }
     }
+
+	//ios 버전
+	@ResponseBody
+	@GetMapping("/posepicker/token")
+	@ApiOperation(value = "ios 포즈피커 토큰 생성", notes = "ios 카카오 로그인 전 포즈피커 토큰 생성")
+	public ResponseEntity<PPTokenResponse> posePickerToken(){
+		return ResponseEntity.ok(kakaoService.posePickerToken());
+	}
+
+	@ResponseBody
+	@PostMapping("/login/ios/kakao")
+	@ApiOperation(value = "ios 카카오 로그인", notes = "ios 버전 카카오 로그인")
+	public ResponseEntity<LoginResponse> iosKakaoLogin(@RequestBody KakaoLoginRequest loginRequest){
+		try{
+			return ResponseEntity.ok(kakaoService.iosKakaoLogin(loginRequest));
+		} catch (NoSuchElementException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Exception");
+		}
+	}
 
 }
 
