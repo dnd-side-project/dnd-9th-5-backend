@@ -22,28 +22,35 @@ public class JwtTokenProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generate(String subject, Date expiredAt) {
+    public String accessTokenGenerate(String subject, Date expiredAt) {
         return Jwts.builder()
-                .setSubject(subject)
+                .setSubject(subject)	//uid
                 .setExpiration(expiredAt)
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
+	public String refreshTokenGenerate(Date expiredAt) {
+		return Jwts.builder()
+			.setExpiration(expiredAt)
+			.signWith(key, SignatureAlgorithm.HS512)
+			.compact();
+	}
 
-    public String extractSubject(String accessToken) {
-        Claims claims = parseClaims(accessToken);
-        return claims.getSubject();
-    }
+	public String extractUid(String accessToken) {
+		Claims claims = parseClaims(accessToken);
+		return claims.getSubject();
+	}
 
-    private Claims parseClaims(String accessToken) {
-        try {
-            return Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(accessToken)
-                    .getBody();
-        } catch (ExpiredJwtException e) {
-            return e.getClaims();
-        }
-    }
+	private Claims parseClaims(String accessToken) {
+		try {
+			return Jwts.parserBuilder()
+				.setSigningKey(key)
+				.build()
+				.parseClaimsJws(accessToken)
+				.getBody();
+		} catch (ExpiredJwtException e) {
+			return e.getClaims();
+		}
+	}
+
 }
