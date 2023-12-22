@@ -63,6 +63,6 @@ public interface PoseInfoRepository extends JpaRepository<PoseInfo, Long> {
 			+ "JOIN bookmark b ON b.pose_id = p.pose_id "
 			+ "WHERE b.uid = :uid "
 			+ "GROUP BY p.pose_id ", nativeQuery = true)
-	Slice<PoseInfo> findBookmark(@Param("uid") String uid, Pageable pageable);
+	Slice<PoseInfo> findBookmark(@Param("uid") Long uid, Pageable pageable);
 
 }

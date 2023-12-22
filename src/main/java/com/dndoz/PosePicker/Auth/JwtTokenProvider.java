@@ -2,6 +2,8 @@ package com.dndoz.PosePicker.Auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -53,4 +55,21 @@ public class JwtTokenProvider {
 		}
 	}
 
+	//유효한 토큰인지 확인
+	public boolean validateToken(String token) {
+		try {
+			Jws<Claims> claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token);
+			return !claims.getBody().getExpiration().before(new Date());
+		} catch (JwtException | IllegalArgumentException e) {
+			return false;
+		}
+	}
+
+	// 헤더에서 Bearer 토큰 부분 추출하는 메서드
+	public String extractJwtToken(String authorizationHeader) {
+		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+			return authorizationHeader.substring(7);
+		}
+		return null;
+	}
 }
