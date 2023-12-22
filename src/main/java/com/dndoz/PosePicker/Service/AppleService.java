@@ -131,11 +131,14 @@ public class AppleService {
 			appleUser.setLoginType("apple");
 			appleUser.setIosId(iosId);
 			userRepository.save(appleUser);
-		}
 
-		//토큰 생성
-		AuthTokens token=authTokensGenerator.generate(appleEmail);
-		return new LoginResponse(uid,nickName,appleEmail,token);
+			//토큰 생성
+			AuthTokens token=authTokensGenerator.generate(appleEmail);
+			return new LoginResponse(uid,nickName,appleEmail,token);
+		} else { // 로그인
+			AuthTokens token=authTokensGenerator.generate(appleEmail);
+			return new LoginResponse(appleUser.getUid(),nickName,appleEmail,token);
+		}
 	}
 
 
