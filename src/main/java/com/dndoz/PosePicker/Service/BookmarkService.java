@@ -35,7 +35,7 @@ public class BookmarkService{
 	@Transactional
 	public BookmarkResponse insert(String accessToken, Long poseId) throws Exception {
 		String token=jwtTokenProvider.extractJwtToken(accessToken);
-		System.out.println("@@@@@@@Bookmark 39행 accesstoken:" + token);
+		//System.out.println("@@@@@@@Bookmark 39행 accesstoken:" + token);
 		if (! jwtTokenProvider.validateToken(token)) {
 			throw new IllegalAccessException("유효한 토큰이 아닙니다.");
 		}

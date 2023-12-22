@@ -36,7 +36,7 @@ public class BookmarkController {
 	@ApiResponse(code = 201, message = "북마크 등록 성공")
 	@ApiOperation(value = "북마크", notes = "북마크 등록")
 	public ResponseEntity<BookmarkResponse> insert(
-		@RequestHeader("Authorization") String accessToken, @RequestParam Long poseId) throws Exception {
+		@RequestHeader(value= "Authorization", required=false) String accessToken, @RequestParam Long poseId) throws Exception {
 		return ResponseEntity.ok(bookmarkService.insert(accessToken, poseId));
 	}
 
@@ -44,7 +44,7 @@ public class BookmarkController {
 	@ApiResponse(code = 200, message = "북마크 취소 성공")
 	@ApiOperation(value = "북마크", notes = "북마크 취소")
 	public ResponseEntity<BookmarkResponse> delete(
-		@RequestHeader("Authorization") String accessToken, @RequestParam Long poseId) throws Exception {
+		@RequestHeader(value= "Authorization", required=false) String accessToken, @RequestParam Long poseId) throws Exception {
 		return ResponseEntity.ok(bookmarkService.delete(accessToken, poseId));
 	}
 
@@ -52,7 +52,7 @@ public class BookmarkController {
 	@ApiResponse(code = 200, message = "북마크 리스트 전달 성공")
 	@ApiOperation(value = "포즈 피드", notes = "북마크 리스트 조회")
 	public ResponseEntity<Slice<PoseInfoResponse>> findBookmark(
-		@RequestHeader("Authorization") String accessToken,
+		@RequestHeader(value= "Authorization", required=false) String accessToken,
 		@RequestParam final Integer pageNumber, @RequestParam final Integer pageSize) throws Exception {
 		return ResponseEntity.ok(bookmarkService.findBookmark(accessToken, pageNumber, pageSize));
 	}
