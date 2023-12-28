@@ -87,14 +87,19 @@ public class PoseService {
 		Slice<PoseInfo> slicedRecommenededPoseInfo;
 		List<PoseInfo> slicedRecommenededResult;
 
-		System.out.println("12123");
-
 		Boolean getRecommendationCheck = poseFilterRepository.getRecommendationCheck(poseFeedRequest.getPeopleCount(),
 			poseFeedRequest.getFrameCount(), poseFeedRequest.getTags());
 
 		if (poseFeedRequest.getPageNumber() == 0) {
-			filteredPoseInfo = poseFilterRepository.findByFilter(pageable, poseFeedRequest.getPeopleCount(),
-				poseFeedRequest.getFrameCount(), poseFeedRequest.getTags());
+			if (null==poseFeedRequest.getTags()) {
+				System.out.println("PoseSerivce: tags is NULL");
+				filteredPoseInfo= poseFilterRepository.findByFilterNoTag(pageable, poseFeedRequest.getPeopleCount(),
+					poseFeedRequest.getFrameCount());
+			} else {
+				filteredPoseInfo = poseFilterRepository.findByFilter(pageable, poseFeedRequest.getPeopleCount(),
+					poseFeedRequest.getFrameCount(), poseFeedRequest.getTags());
+			}
+
 		}
 
 		Integer endIdx = Math.min(filteredPoseInfo.size(), (int)pageable.getOffset() + pageable.getPageSize());
