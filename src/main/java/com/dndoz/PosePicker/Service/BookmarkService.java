@@ -92,7 +92,10 @@ public class BookmarkService{
 		}
 		Long uid= Long.valueOf(jwtTokenProvider.extractUid(token));
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
-		return poseInfoRepository.findBookmark(uid,pageable).map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
+
+		Slice<PoseInfo> poseInfos = poseInfoRepository.findBookmark(uid, pageable);
+		poseInfos.getContent().forEach(poseInfo -> poseInfo.setBookmarkCheck(true)); // 북마크가 있는 경우
+		return poseInfos.map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
 	}
 
 }

@@ -3,20 +3,25 @@ package com.dndoz.PosePicker.Auth;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
 
+
 @Component
 public class JwtTokenProvider {
-
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final Key key;
 
     public JwtTokenProvider(@Value("${custom.jwt.secretKey}") String secretKey) {
@@ -60,7 +65,13 @@ public class JwtTokenProvider {
 		try {
 			Jws<Claims> claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token);
 			return !claims.getBody().getExpiration().before(new Date());
-		} catch (JwtException | IllegalArgumentException e) {
+		} catch (ExpiredJwtException e) {
+			// 토큰이 만료된 경우
+			logger.error("Expired JWT token: {}", e.getMessage());
+			return false;
+		} catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
+			// 지원되지 않는 토큰, 형식이 잘못된 토큰, 서명 검증 실패 등의 예외
+			logger.error("Invalid JWT token: {}", e.getMessage());
 			return false;
 		}
 	}

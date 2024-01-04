@@ -1,7 +1,10 @@
 package com.dndoz.PosePicker.Service;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -11,6 +14,7 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dndoz.PosePicker.Auth.JwtTokenProvider;
 import com.dndoz.PosePicker.Domain.PoseInfo;
 import com.dndoz.PosePicker.Domain.PoseTagAttribute;
 import com.dndoz.PosePicker.Domain.PoseTalk;
@@ -24,27 +28,23 @@ import com.dndoz.PosePicker.Repository.PoseInfoRepository;
 import com.dndoz.PosePicker.Repository.PoseTagAttributeRepository;
 import com.dndoz.PosePicker.Repository.PoseTalkRepository;
 
+import lombok.RequiredArgsConstructor;
+
 @Transactional(readOnly = true)
 @Service
+@RequiredArgsConstructor
 public class PoseService {
 	private final PoseInfoRepository poseInfoRepository;
 	private final PoseTalkRepository poseTalkRepository;
 	private final PoseFilterRepository poseFilterRepository;
 	private final PoseTagAttributeRepository poseTagAttributeRepository;
+	private final JwtTokenProvider jwtTokenProvider;
 
 	@Value("${aws.image_url.prefix}")
 	private String urlPrefix;
 
 	private List<PoseInfo> filteredPoseInfo;
 	private List<PoseInfo> recommendedPoseInfo;
-
-	public PoseService(final PoseInfoRepository poseInfoRepository, final PoseTalkRepository poseTalkRepository,
-		final PoseFilterRepository poseFilterRepository, final PoseTagAttributeRepository poseTagAttributeRepository) {
-		this.poseInfoRepository = poseInfoRepository;
-		this.poseTalkRepository = poseTalkRepository;
-		this.poseFilterRepository = poseFilterRepository;
-		this.poseTagAttributeRepository = poseTagAttributeRepository;
-	}
 
 	//포즈 이미지 상세 조회
 	public PoseInfoResponse getPoseInfo(Long pose_id) {
@@ -71,14 +71,52 @@ public class PoseService {
 		return new PoseTagAttributeResponse(poseTagAttributes);
 	}
 
+	@Transactional
+	public void setBookmarkStatusForPoses(Long userId) {
+		//한 번의 조회로 여러 포즈에 대한 북마크 여부를 설정
+		List<Object[]> bookmarkStatusList = poseInfoRepository.findBookmarkStatusByUserId(userId);
+		Map<Long, Boolean> bookmarkStatusMap = new HashMap<>();
+
+		for (Object[] result : bookmarkStatusList) {
+			Long poseId = Long.valueOf(result[0].toString());
+			boolean isBookmarked = ((BigInteger) result[1]).compareTo(BigInteger.ZERO) != 0;
+			bookmarkStatusMap.put(poseId, isBookmarked);
+		}
+		List<PoseInfo> poses = poseInfoRepository.findPosesWithBookmarkStatus(userId);
+		for (PoseInfo pose : poses) {
+			boolean isBookmarked = bookmarkStatusMap.getOrDefault(pose.getPoseId(), false);
+			pose.setBookmarkCheck(isBookmarked);
+		}
+		poseInfoRepository.saveAll(poses);
+	}
+
 	@Transactional(readOnly = true)
-	public Slice<PoseInfoResponse> findPoses(final Integer pageNumber, final Integer pageSize) {
+	public Slice<PoseInfoResponse> findPoses(String accessToken, final Integer pageNumber, final Integer pageSize) throws IllegalAccessException {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+		if (null!=accessToken) {
+			String token=jwtTokenProvider.extractJwtToken(accessToken);
+			if (! jwtTokenProvider.validateToken(token)) {
+				throw new IllegalAccessException("유효한 토큰이 아닙니다.");
+			}
+			Long userId= Long.valueOf(jwtTokenProvider.extractUid(token));
+			setBookmarkStatusForPoses(userId);
+		}
+
 		return poseInfoRepository.findPoses(pageable).map(poseInfo -> new PoseInfoResponse(urlPrefix, poseInfo));
 	}
 
 	@Transactional(readOnly = true)
-	public PoseFeedResponse getPoseFeed(final PoseFeedRequest poseFeedRequest) {
+	public PoseFeedResponse getPoseFeed(String accessToken, final PoseFeedRequest poseFeedRequest) throws IllegalAccessException {
+		if (null!=accessToken) {
+			String token=jwtTokenProvider.extractJwtToken(accessToken);
+			if (! jwtTokenProvider.validateToken(token)) {
+				throw new IllegalAccessException("유효한 토큰이 아닙니다.");
+			}
+			Long userId= Long.valueOf(jwtTokenProvider.extractUid(token));
+			setBookmarkStatusForPoses(userId);
+		}
+
 		Pageable pageable = PageRequest.of(poseFeedRequest.getPageNumber(), poseFeedRequest.getPageSize());
 		Slice<PoseInfoResponse> filteredContents;
 		Slice<PoseInfo> slicedFilteredPoseInfo;
@@ -99,7 +137,6 @@ public class PoseService {
 				filteredPoseInfo = poseFilterRepository.findByFilter(pageable, poseFeedRequest.getPeopleCount(),
 					poseFeedRequest.getFrameCount(), poseFeedRequest.getTags());
 			}
-
 		}
 
 		Integer endIdx = Math.min(filteredPoseInfo.size(), (int)pageable.getOffset() + pageable.getPageSize());

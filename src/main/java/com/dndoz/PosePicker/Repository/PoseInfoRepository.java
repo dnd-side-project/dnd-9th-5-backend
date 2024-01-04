@@ -1,5 +1,6 @@
 package com.dndoz.PosePicker.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,14 @@ public interface PoseInfoRepository extends JpaRepository<PoseInfo, Long> {
 			+ "JOIN tag t ON p.pose_id = t.pose_id " + "JOIN tag_attribute ta ON t.attribute_id = ta.attribute_id "
 			+ "GROUP BY p.pose_id ", nativeQuery = true)
 	Slice<PoseInfo> findPoses(Pageable pageable);
+
+	//포즈피드 북마크 여부 확인
+	@Query(value="SELECT p.pose_id, CASE WHEN b.uid IS NOT NULL THEN TRUE ELSE FALSE END AS bookmarkCheck " +
+		"FROM pose_info p LEFT JOIN bookmark b ON p.pose_id = b.pose_id AND b.uid = :userId", nativeQuery = true)
+	List<Object[]> findBookmarkStatusByUserId(@Param("userId") Long userId);
+
+	@Query(value="SELECT p.* FROM pose_info p LEFT JOIN bookmark b ON p.pose_id = b.pose_id AND b.uid = :userId", nativeQuery = true)
+	List<PoseInfo> findPosesWithBookmarkStatus(@Param("userId") Long userId);
 
 	@Query(value =
 		"SELECT COUNT(*) "
