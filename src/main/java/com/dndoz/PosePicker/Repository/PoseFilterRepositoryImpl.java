@@ -96,27 +96,33 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 			.orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc())
 			.fetch();
 
-		List<String> tagsCondition = Arrays.asList(tags.split(","));
-		List<PoseInfo> result = new ArrayList<>();
-		for (PoseInfo pi : poseInfoList) {
-			List<String> attributes = queryFactory.select(qPoseTagAttribute.attribute)
-				.from(qPoseTag)
-				.join(qPoseTagAttribute)
-				.on(qPoseTag.poseTagAttribute.eq(qPoseTagAttribute))
-				.where(qPoseTag.poseInfo.eq(pi))
-				.orderBy(qPoseTagAttribute.attributeId.asc())
-				.fetch();
+		if (null==tags) {
+			System.out.println("PoseFilterRepository: getRecommendationCheck Func : tags=null");
+			return false;
+		}else{
+			List<String> tagsCondition = Arrays.asList(tags.split(","));
+			List<PoseInfo> result = new ArrayList<>();
+			for (PoseInfo pi : poseInfoList) {
+				List<String> attributes = queryFactory.select(qPoseTagAttribute.attribute)
+					.from(qPoseTag)
+					.join(qPoseTagAttribute)
+					.on(qPoseTag.poseTagAttribute.eq(qPoseTagAttribute))
+					.where(qPoseTag.poseInfo.eq(pi))
+					.orderBy(qPoseTagAttribute.attributeId.asc())
+					.fetch();
 
-			if (tags.isEmpty() || attributes.containsAll(tagsCondition)) {
-				String attributesResult = String.join(",", attributes);
+				if (attributes.containsAll(tagsCondition)) {
+					String attributesResult = String.join(",", attributes);
 
-				PoseInfo poseInfo = new PoseInfo(pi, attributesResult);
-				result.add(poseInfo);
+					PoseInfo poseInfo = new PoseInfo(pi, attributesResult);
+					result.add(poseInfo);
+				}
+				if (result.size() > 4)
+					return false;
 			}
-			if (result.size() > 4)
-				return false;
+			return true;
 		}
-		return true;
+
 	}
 
 	@Override
@@ -153,6 +159,40 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 				result.add(poseInfo);
 			}
 
+		}
+
+		return result;
+	}
+
+	@Override
+	public List<PoseInfo> findByFilterNoTag(Pageable pageable, Long people_count, Long frame_count) {
+		QPoseInfo qPoseInfo = QPoseInfo.poseInfo;
+		QPoseTag qPoseTag = QPoseTag.poseTag;
+		QPoseTagAttribute qPoseTagAttribute = QPoseTagAttribute.poseTagAttribute;
+
+		List<PoseInfo> poseInfoList = queryFactory
+			.selectFrom(qPoseInfo)
+			.groupBy(qPoseInfo.poseId)	//추가
+			.where(
+				eqPeopleCount(qPoseInfo, people_count),
+				eqFrameCount(qPoseInfo, frame_count)
+			)
+			.orderBy(new OrderSpecifier<>(Order.ASC, Expressions.numberTemplate(Double.class, "rand()")))
+			.fetch();
+
+		List<PoseInfo> result = new ArrayList<>();
+		for (PoseInfo pi : poseInfoList) {
+			List<String> attributes = queryFactory.select(qPoseTagAttribute.attribute)
+				.from(qPoseTag)
+				.join(qPoseTagAttribute)
+				.on(qPoseTag.poseTagAttribute.eq(qPoseTagAttribute))
+				.where(qPoseTag.poseInfo.eq(pi))
+				.orderBy(qPoseTagAttribute.attributeId.asc())
+				.fetch();
+
+			String attributesResult = String.join(",", attributes);
+			PoseInfo poseInfo = new PoseInfo(pi, attributesResult);
+			result.add(poseInfo);
 		}
 
 		return result;

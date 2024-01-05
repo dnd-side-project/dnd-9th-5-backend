@@ -16,6 +16,8 @@ public interface PoseFilterRepositoryCustom {
 
 	List<PoseInfo> findByFilter(Pageable pageable, Long people_count, Long frame_count, String tags);
 
+	List<PoseInfo> findByFilterNoTag(Pageable pageable, Long people_count, Long frame_count);
+
 	List<PoseInfo> getRecommendedContents(Pageable pageable);
 
 }

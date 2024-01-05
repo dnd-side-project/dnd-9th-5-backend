@@ -3,7 +3,9 @@ package com.dndoz.PosePicker.Service;
 import com.dndoz.PosePicker.Auth.AuthTokens;
 import com.dndoz.PosePicker.Auth.AuthTokensGenerator;
 import com.dndoz.PosePicker.Domain.User;
+import com.dndoz.PosePicker.Dto.KakaoLoginRequest;
 import com.dndoz.PosePicker.Dto.LoginResponse;
+import com.dndoz.PosePicker.Dto.PPTokenResponse;
 import com.dndoz.PosePicker.Repository.UserRepository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -23,13 +25,49 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 
-
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class KakaoService {
     private final UserRepository userRepository;
     private final AuthTokensGenerator authTokensGenerator;
 
+	/** [1] ios 버전 카카오 로그인 **/
+	//포즈피커 자체 토큰 생성 후 전달
+	public PPTokenResponse posePickerToken(){
+		String token= authTokensGenerator.posePickerGenerate();
+		PPTokenResponse tokenDto= new PPTokenResponse();
+		tokenDto.setToken(token);
+		return tokenDto;
+	}
+
+	public LoginResponse iosKakaoLogin(KakaoLoginRequest loginRequest) {
+		Long uid=loginRequest.getUid();
+		String email= loginRequest.getEmail();
+		String subject= authTokensGenerator.extractSubject(loginRequest.getToken());
+
+		if (subject.equals("posePickerLogin")){
+			User kakaoUser = userRepository.findById(loginRequest.getUid())
+				.orElse(null);
+
+			if (kakaoUser == null) {    //회원가입
+				kakaoUser= new User();
+				kakaoUser.setUid(uid);
+				kakaoUser.setNickname("nickname");
+				kakaoUser.setEmail(email);
+				kakaoUser.setLoginType("kakao");
+				userRepository.save(kakaoUser);
+			}
+			//토큰 생성
+			AuthTokens token=authTokensGenerator.generate(loginRequest.getUid().toString());
+			return new LoginResponse(uid,"nickname",email,token);
+
+		}else{
+			return null;
+		}
+
+	}
+
+	/** [2] Web 버전 카카오 로그인 **/
     public LoginResponse kakaoLogin(String code) {
         // 1. "인가 코드"로 "액세스 토큰" 요청
         String accessToken = getAccessToken(code);
@@ -47,7 +85,6 @@ public class UserService {
     private String clientId;
     @Value("${kakao.redirect-uri}")
     private String redirectUri;
-
 
     //1. "인가 코드"로 "액세스 토큰" 요청
     private String getAccessToken(String code) {
@@ -110,14 +147,14 @@ public class UserService {
         JsonNode jsonNode = null;
         try {
             jsonNode = objectMapper.readTree(responseBody);
+            //System.out.println(jsonNode);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
 
         Long id = jsonNode.get("id").asLong();
         String email = jsonNode.get("kakao_account").get("email").asText();
-        String nickname = jsonNode.get("properties")
-                .get("nickname").asText();
+        String nickname = jsonNode.get("properties").get("nickname").asText();
 
         userInfo.put("id",id);
         userInfo.put("email",email);
@@ -133,16 +170,18 @@ public class UserService {
         String kakaoEmail = userInfo.get("email").toString();
         String nickName = userInfo.get("nickname").toString();
 
-        User kakaoUser = userRepository.findByEmail(kakaoEmail)
-                .orElse(null);
+        User kakaoUser = userRepository.findByEmail(kakaoEmail).orElse(null);
 
         if (kakaoUser == null) {    //회원가입
-            kakaoUser = new User(uid, nickName, kakaoEmail);
+        	kakaoUser= new User();
+        	kakaoUser.setUid(uid);
+        	kakaoUser.setNickname(nickName);
+        	kakaoUser.setEmail(kakaoEmail);
+        	kakaoUser.setLoginType("kakao");
             userRepository.save(kakaoUser);
         }
-
         //토큰 생성
-        AuthTokens token=authTokensGenerator.generate(kakaoEmail);
+        AuthTokens token=authTokensGenerator.generate(uid.toString());
         return new LoginResponse(uid,nickName,kakaoEmail,token);
     }
 
