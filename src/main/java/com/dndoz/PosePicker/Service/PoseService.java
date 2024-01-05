@@ -97,7 +97,7 @@ public class PoseService {
 		if (null!=accessToken) {
 			String token=jwtTokenProvider.extractJwtToken(accessToken);
 			if (! jwtTokenProvider.validateToken(token)) {
-				throw new IllegalAccessException("유효한 토큰이 아닙니다.");
+				return null;
 			}
 			Long userId= Long.valueOf(jwtTokenProvider.extractUid(token));
 			setBookmarkStatusForPoses(userId);
@@ -111,7 +111,7 @@ public class PoseService {
 		if (null!=accessToken) {
 			String token=jwtTokenProvider.extractJwtToken(accessToken);
 			if (! jwtTokenProvider.validateToken(token)) {
-				throw new IllegalAccessException("유효한 토큰이 아닙니다.");
+				return null;
 			}
 			Long userId= Long.valueOf(jwtTokenProvider.extractUid(token));
 			setBookmarkStatusForPoses(userId);

@@ -33,13 +33,11 @@ public class BookmarkService{
 
 	//북마크 등록
 	@Transactional
-	public BookmarkResponse insert(String accessToken, Long poseId) throws Exception {
+	public BookmarkResponse insert(String accessToken, Long poseId) throws Exception{
 		String token=jwtTokenProvider.extractJwtToken(accessToken);
-		//System.out.println("@@@@@@@Bookmark 39행 accesstoken:" + token);
 		if (! jwtTokenProvider.validateToken(token)) {
-			throw new IllegalAccessException("유효한 토큰이 아닙니다.");
+			return null;
 		}
-
 		Long userId= Long.valueOf(jwtTokenProvider.extractUid(token));
 		User user=userRepository.findById(userId).orElseThrow(NullPointerException::new);
 		PoseInfo poseInfo = poseInfoRepository.findByPoseId(poseId).orElseThrow(NullPointerException::new);
@@ -63,9 +61,8 @@ public class BookmarkService{
 	public BookmarkResponse delete(String accessToken, Long poseId) throws Exception {
 		String token=jwtTokenProvider.extractJwtToken(accessToken);
 		if (! jwtTokenProvider.validateToken(token)) {
-			throw new IllegalAccessException("유효한 토큰이 아닙니다.");
+			return null;
 		}
-
 		Long userId= Long.valueOf(jwtTokenProvider.extractUid(token));
 		User user=userRepository.findById(userId).orElseThrow(NullPointerException::new);
 		PoseInfo poseInfo = poseInfoRepository.findByPoseId(poseId).orElseThrow(NullPointerException::new);
@@ -84,11 +81,11 @@ public class BookmarkService{
 
 	// 북마크 피드 리스트 스크롤
 	@Transactional(readOnly = true)
-	public Slice<PoseInfoResponse> findBookmark(String accessToken, final Integer pageNumber, final Integer pageSize) throws
-		IllegalAccessException {
+	public Slice<PoseInfoResponse> findBookmark(String accessToken, final Integer pageNumber, final Integer pageSize)
+		throws IllegalAccessException {
 		String token=jwtTokenProvider.extractJwtToken(accessToken);
 		if (! jwtTokenProvider.validateToken(token)) {
-			throw new IllegalAccessException("유효한 토큰이 아닙니다.");
+			return null;
 		}
 		Long uid= Long.valueOf(jwtTokenProvider.extractUid(token));
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);

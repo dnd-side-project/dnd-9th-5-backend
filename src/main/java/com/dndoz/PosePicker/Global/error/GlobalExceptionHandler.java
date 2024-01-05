@@ -16,9 +16,11 @@ import org.springframework.web.multipart.MultipartException;
 
 import com.dndoz.PosePicker.Global.error.exception.BusinessException;
 import com.dndoz.PosePicker.Global.error.exception.ErrorCode;
-import com.dndoz.PosePicker.Global.status.StatusCode;
-import com.dndoz.PosePicker.Global.status.StatusResponse;
 
+
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.extern.slf4j.Slf4j;
 
 @ControllerAdvice
@@ -113,4 +115,34 @@ public class GlobalExceptionHandler {
         final ErrorResponse response = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR);
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    //JWT 토큰 에러 추가
+	@ExceptionHandler(UnsupportedJwtException.class)
+	public ResponseEntity<ErrorResponse> UnsupportedJwtException(Exception e) {
+		e.printStackTrace();
+		final ErrorResponse response = ErrorResponse.of(ErrorCode.UNSUPPORTED_JWT_TOKEN);
+		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(MalformedJwtException.class)
+	public ResponseEntity<ErrorResponse> MalformedJwtException(Exception e) {
+		e.printStackTrace();
+		final ErrorResponse response = ErrorResponse.of(ErrorCode.MALFORMED_JWT_TOKEN);
+		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(ExpiredJwtException.class)
+	public ResponseEntity<ErrorResponse> ExpiredJwtException(Exception e) {
+		e.printStackTrace();
+		final ErrorResponse response = ErrorResponse.of(ErrorCode.EXPIRED_JWT_TOKEN);
+		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(IllegalAccessException.class)
+	public ResponseEntity<ErrorResponse> IllegalAccessException(Exception e) {
+		e.printStackTrace();
+		final ErrorResponse response = ErrorResponse.of(ErrorCode.UNAUTHORIZED_JWT_TOKEN);
+		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+	}
+
 }

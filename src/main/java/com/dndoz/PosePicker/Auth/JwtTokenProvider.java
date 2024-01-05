@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
 
-
 @Component
 public class JwtTokenProvider {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -61,18 +60,26 @@ public class JwtTokenProvider {
 	}
 
 	//유효한 토큰인지 확인
-	public boolean validateToken(String token) {
+	public boolean validateToken(String token) throws IllegalAccessException{
 		try {
 			Jws<Claims> claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token);
 			return !claims.getBody().getExpiration().before(new Date());
 		} catch (ExpiredJwtException e) {
 			// 토큰이 만료된 경우
 			logger.error("Expired JWT token: {}", e.getMessage());
-			return false;
-		} catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
-			// 지원되지 않는 토큰, 형식이 잘못된 토큰, 서명 검증 실패 등의 예외
+			throw e;
+		} catch (UnsupportedJwtException e) {
+			// 지원되지 않는 토큰
+			logger.error("Unsupported JWT token: {}", e.getMessage());
+			throw e;
+		} catch (MalformedJwtException e) {
+			// 잘못된 jwt 구조 토큰
+			logger.error("Malformed JWT token: {}", e.getMessage());
+			throw e;
+		} catch (Exception e) {
 			logger.error("Invalid JWT token: {}", e.getMessage());
-			return false;
+			//throw new IllegalAccessException("유효한 토큰이 아닙니다.");
+			throw e;
 		}
 	}
 
