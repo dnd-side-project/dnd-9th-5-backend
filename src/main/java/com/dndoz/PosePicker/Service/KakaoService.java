@@ -2,10 +2,14 @@ package com.dndoz.PosePicker.Service;
 
 import com.dndoz.PosePicker.Auth.AuthTokens;
 import com.dndoz.PosePicker.Auth.AuthTokensGenerator;
+import com.dndoz.PosePicker.Auth.JwtTokenProvider;
 import com.dndoz.PosePicker.Domain.User;
 import com.dndoz.PosePicker.Dto.KakaoLoginRequest;
 import com.dndoz.PosePicker.Dto.LoginResponse;
 import com.dndoz.PosePicker.Dto.PPTokenResponse;
+import com.dndoz.PosePicker.Global.status.StatusCode;
+import com.dndoz.PosePicker.Global.status.StatusResponse;
+import com.dndoz.PosePicker.Repository.BookmarkRepository;
 import com.dndoz.PosePicker.Repository.UserRepository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -30,6 +34,8 @@ import java.util.HashMap;
 public class KakaoService {
     private final UserRepository userRepository;
     private final AuthTokensGenerator authTokensGenerator;
+	private final JwtTokenProvider jwtTokenProvider;
+	private final BookmarkRepository bookmarkRepository;
 
 	/** [1] ios 버전 카카오 로그인 **/
 	//포즈피커 자체 토큰 생성 후 전달
@@ -185,4 +191,18 @@ public class KakaoService {
         return new LoginResponse(uid,nickName,kakaoEmail,token);
     }
 
+    //탈퇴하기
+	public StatusResponse signOut(String accessToken) throws IllegalAccessException {
+		String token=jwtTokenProvider.extractJwtToken(accessToken);
+		if (! jwtTokenProvider.validateToken(token)) {
+			return null;
+		}
+		Long uid= Long.valueOf(jwtTokenProvider.extractUid(token));
+		User user=userRepository.findById(uid).orElseThrow(NullPointerException::new);
+
+		//북마크 정보, 회원 정보 삭제
+		bookmarkRepository.deleteByUser(user);
+		userRepository.delete(user);
+		return new StatusResponse(StatusCode.OK,"회원 탈퇴 성공");
+	}
 }
