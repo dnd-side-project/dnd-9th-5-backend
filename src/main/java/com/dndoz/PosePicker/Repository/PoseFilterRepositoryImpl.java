@@ -37,7 +37,7 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 			.leftJoin(qPoseTagAttribute).on(qPoseTag.poseTagAttribute.attributeId.eq(qPoseTagAttribute.attributeId))
 			.where(qPoseInfo.poseId.eq(pose_id))
 			.groupBy(qPoseInfo.poseId)
-			.fetchOne();
+			.fetchOne();	//poseId 고유한 결과-> fetchOne
 
 		List<String> attributes = queryFactory.select(qPoseTagAttribute.attribute)
 			.from(qPoseTag)
@@ -65,7 +65,7 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 				eqPeopleCount(qPoseInfo, people_count)
 			)
 			.orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc())
-			.fetchFirst();
+			.fetchFirst();	//랜덤 첫번째 결과-> fetchFirst
 
 		List<String> attributes = queryFactory.select(qPoseTagAttribute.attribute)
 			.from(qPoseTag)
