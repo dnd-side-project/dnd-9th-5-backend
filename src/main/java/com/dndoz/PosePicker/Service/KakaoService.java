@@ -3,6 +3,7 @@ package com.dndoz.PosePicker.Service;
 import com.dndoz.PosePicker.Auth.AuthTokens;
 import com.dndoz.PosePicker.Auth.AuthTokensGenerator;
 import com.dndoz.PosePicker.Auth.JwtTokenProvider;
+import com.dndoz.PosePicker.Auth.PPJwtTokenProvider;
 import com.dndoz.PosePicker.Domain.User;
 import com.dndoz.PosePicker.Dto.KakaoLoginRequest;
 import com.dndoz.PosePicker.Dto.LoginResponse;
@@ -35,6 +36,7 @@ public class KakaoService {
     private final UserRepository userRepository;
     private final AuthTokensGenerator authTokensGenerator;
 	private final JwtTokenProvider jwtTokenProvider;
+	private final PPJwtTokenProvider psJwTokenProvider;
 	private final BookmarkRepository bookmarkRepository;
 
 	/** [1] ios 버전 카카오 로그인 **/
@@ -46,14 +48,16 @@ public class KakaoService {
 		return tokenDto;
 	}
 
-	public LoginResponse iosKakaoLogin(KakaoLoginRequest loginRequest) {
+	public LoginResponse iosKakaoLogin(KakaoLoginRequest loginRequest) throws IllegalAccessException {
 		Long uid=loginRequest.getUid();
 		String email= loginRequest.getEmail();
 		String subject= authTokensGenerator.extractSubject(loginRequest.getToken());
 
 		if (subject.equals("posePickerLogin")){
-			User kakaoUser = userRepository.findById(loginRequest.getUid())
-				.orElse(null);
+			if (! psJwTokenProvider.validateToken(loginRequest.getToken())) {
+				return null;
+			}
+			User kakaoUser = userRepository.findById(loginRequest.getUid()).orElse(null);
 
 			if (kakaoUser == null) {    //회원가입
 				kakaoUser= new User();
@@ -70,7 +74,6 @@ public class KakaoService {
 		}else{
 			return null;
 		}
-
 	}
 
 	/** [2] Web 버전 카카오 로그인 **/

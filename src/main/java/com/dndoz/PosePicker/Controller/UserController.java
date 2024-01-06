@@ -52,7 +52,7 @@ public class UserController {
 	public ResponseEntity<LoginResponse> iosKakaoLogin(@RequestBody KakaoLoginRequest loginRequest){
 		try{
 			return ResponseEntity.ok(kakaoService.iosKakaoLogin(loginRequest));
-		} catch (NoSuchElementException e) {
+		} catch (NoSuchElementException | IllegalAccessException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Exception");
 		}
 	}
