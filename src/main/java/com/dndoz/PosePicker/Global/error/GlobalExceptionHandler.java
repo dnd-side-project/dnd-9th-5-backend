@@ -14,6 +14,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 
+import com.dndoz.PosePicker.Global.error.exception.BookmarkException;
 import com.dndoz.PosePicker.Global.error.exception.BusinessException;
 import com.dndoz.PosePicker.Global.error.exception.ErrorCode;
 
@@ -121,28 +122,34 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> UnsupportedJwtException(Exception e) {
 		e.printStackTrace();
 		final ErrorResponse response = ErrorResponse.of(ErrorCode.UNSUPPORTED_JWT_TOKEN);
-		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
 	}
 
 	@ExceptionHandler(MalformedJwtException.class)
 	public ResponseEntity<ErrorResponse> MalformedJwtException(Exception e) {
 		e.printStackTrace();
 		final ErrorResponse response = ErrorResponse.of(ErrorCode.MALFORMED_JWT_TOKEN);
-		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
 	}
 
 	@ExceptionHandler(ExpiredJwtException.class)
 	public ResponseEntity<ErrorResponse> ExpiredJwtException(Exception e) {
 		e.printStackTrace();
 		final ErrorResponse response = ErrorResponse.of(ErrorCode.EXPIRED_JWT_TOKEN);
-		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
 	}
 
 	@ExceptionHandler(IllegalAccessException.class)
 	public ResponseEntity<ErrorResponse> IllegalAccessException(Exception e) {
 		e.printStackTrace();
 		final ErrorResponse response = ErrorResponse.of(ErrorCode.UNAUTHORIZED_JWT_TOKEN);
-		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
 	}
 
+	//북마크 에러
+	@ExceptionHandler(BookmarkException.class)
+	public ResponseEntity<ErrorResponse> handleBookmarkException(BookmarkException e) {
+		final ErrorResponse response = ErrorResponse.of(ErrorCode.BOOKMARK_BAD_REQUEST);
+		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+	}
 }

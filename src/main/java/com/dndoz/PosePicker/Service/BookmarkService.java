@@ -13,6 +13,7 @@ import com.dndoz.PosePicker.Domain.PoseInfo;
 import com.dndoz.PosePicker.Domain.User;
 import com.dndoz.PosePicker.Dto.BookmarkResponse;
 import com.dndoz.PosePicker.Dto.PoseInfoResponse;
+import com.dndoz.PosePicker.Global.error.exception.BookmarkException;
 import com.dndoz.PosePicker.Repository.BookmarkRepository;
 import com.dndoz.PosePicker.Repository.PoseInfoRepository;
 import com.dndoz.PosePicker.Repository.UserRepository;
@@ -51,7 +52,7 @@ public class BookmarkService{
 			response.setPoseId(poseInfo.getPoseId());
 			return response;
 		}else{
-			throw new Exception();
+			throw new BookmarkException("Bookmark already exists for the user and poseInfo");
 		}
 	}
 
@@ -75,7 +76,7 @@ public class BookmarkService{
 			response.setPoseId(-1L);
 			return response;
 		} else{
-			throw new Exception();
+			throw new BookmarkException("Bookmark doesn't exists for the user and poseInfo");
 		}
 	}
 

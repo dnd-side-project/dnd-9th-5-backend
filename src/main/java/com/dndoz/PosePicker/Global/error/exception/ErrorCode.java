@@ -17,10 +17,13 @@ public enum ErrorCode {
     EXPECTATION_FAILED(417, "C010", "EXPECTATION_FAILED"),
 	//JWT 토큰 ErrorCode
 	UNSUPPORTED_JWT_TOKEN(401,"C011","UnsupportedJwtException 지원되지 않는 토큰"),
-	MALFORMED_JWT_TOKEN(402,"C012","MalformedJwtException 잘못된 jwt 구조"),
-	EXPIRED_JWT_TOKEN(403,"C013","ExpiredJwtException 토큰 만료"),
-	UNAUTHORIZED_JWT_TOKEN(401,"C014","Unauthorized")
+	MALFORMED_JWT_TOKEN(401,"C012","MalformedJwtException 잘못된 jwt 구조"),
+	EXPIRED_JWT_TOKEN(401,"C013","ExpiredJwtException 토큰 만료"),
+	UNAUTHORIZED_JWT_TOKEN(401,"C014","Unauthorized"),
+
+	BOOKMARK_BAD_REQUEST(400,"C015","북마크 API 잘못된 요청")
 	;
+
 
     private final String code;
     private final String message;
