@@ -7,7 +7,6 @@
     <meta name="author" content="David Grzyb">
     <meta name="description" content="">
 
-    <!-- Tailwind -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css?family=Karla:400,700&display=swap');
@@ -31,14 +30,6 @@
             </button>
         </div>
         <nav class="text-white text-base font-semibold pt-3">
-<!--            <a href="index.html" class="flex items-center text-white opacity-75 hover:opacity-100 py-4 pl-6 nav-item">-->
-<!--                <i class="fas fa-tachometer-alt mr-3"></i>-->
-<!--                Dashboard-->
-<!--            </a>-->
-<!--            <a href="blank.html" class="flex items-center text-white opacity-75 hover:opacity-100 py-4 pl-6 nav-item">-->
-<!--                <i class="fas fa-sticky-note mr-3"></i>-->
-<!--                Blank Page-->
-<!--            </a>-->
             <a href="tables" class="flex items-center active-nav-link text-white py-4 pl-6 nav-item">
                 <i class="fas fa-table mr-3"></i>
                 포즈 전체 보기
@@ -47,14 +38,14 @@
                 <i class="fas fa-align-left mr-3"></i>
                 포즈 등록 하기
             </a>
-<!--            <a href="tabs.html" class="flex items-center text-white opacity-75 hover:opacity-100 py-4 pl-6 nav-item">-->
-<!--                <i class="fas fa-tablet-alt mr-3"></i>-->
-<!--                Tabbed Content-->
-<!--            </a>-->
-<!--            <a href="calendar.html" class="flex items-center text-white opacity-75 hover:opacity-100 py-4 pl-6 nav-item">-->
-<!--                <i class="fas fa-calendar mr-3"></i>-->
-<!--                Calendar-->
-<!--            </a>-->
+            <a href="#" class="flex items-center text-white opacity-75 hover:opacity-100 py-4 pl-6 nav-item">
+                <i class="fas fa-align-left mr-3"></i>
+                🛠 포즈톡
+            </a>
+            <a href="#" class="flex items-center text-white opacity-75 hover:opacity-100 py-4 pl-6 nav-item">
+                <i class="fas fa-align-left mr-3"></i>
+                🛠 포즈태그
+            </a>
         </nav>
     </aside>
 
@@ -69,40 +60,6 @@
                     </p>
                     <div class="bg-white overflow-auto">
                         <table class="min-w-full bg-white">
-<!--                            <thead class="bg-gray-800 text-white">-->
-<!--                                <tr>-->
-<!--                                    <th class="w-1/3 text-left py-3 px-4 uppercase font-semibold text-sm">Name</th>-->
-<!--                                    <th class="w-1/3 text-left py-3 px-4 uppercase font-semibold text-sm">Last name</th>-->
-<!--                                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Phone</th>-->
-<!--                                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Email</td>-->
-<!--                                </tr>-->
-<!--                            </thead>-->
-<!--                            <tbody class="text-gray-700">-->
-<!--                                <tr>-->
-<!--                                    <td class="w-1/3 text-left py-3 px-4">Lian</td>-->
-<!--                                    <td class="w-1/3 text-left py-3 px-4">Smith</td>-->
-<!--                                    <td class="text-left py-3 px-4"><a class="hover:text-blue-500" href="tel:622322662">622322662</a></td>-->
-<!--                                    <td class="text-left py-3 px-4"><a class="hover:text-blue-500" href="mailto:jonsmith@mail.com">jonsmith@mail.com</a></td>-->
-<!--                                </tr>-->
-<!--                                <tr class="bg-gray-200">-->
-<!--                                    <td class="w-1/3 text-left py-3 px-4">Emma</td>-->
-<!--                                    <td class="w-1/3 text-left py-3 px-4">Johnson</td>-->
-<!--                                    <td class="text-left py-3 px-4"><a class="hover:text-blue-500" href="tel:622322662">622322662</a></td>-->
-<!--                                    <td class="text-left py-3 px-4"><a class="hover:text-blue-500" href="mailto:jonsmith@mail.com">jonsmith@mail.com</a></td>-->
-<!--                                </tr>-->
-<!--                                <tr>-->
-<!--                                    <td class="w-1/3 text-left py-3 px-4">Oliver</td>-->
-<!--                                    <td class="w-1/3 text-left py-3 px-4">Williams</td>-->
-<!--                                    <td class="text-left py-3 px-4"><a class="hover:text-blue-500" href="tel:622322662">622322662</a></td>-->
-<!--                                    <td class="text-left py-3 px-4"><a class="hover:text-blue-500" href="mailto:jonsmith@mail.com">jonsmith@mail.com</a></td>-->
-<!--                                </tr>-->
-<!--                                <tr class="bg-gray-200">-->
-<!--                                    <td class="w-1/3 text-left py-3 px-4">Isabella</td>-->
-<!--                                    <td class="w-1/3 text-left py-3 px-4">Brown</td>-->
-<!--                                    <td class="text-left py-3 px-4"><a class="hover:text-blue-500" href="tel:622322662">622322662</a></td>-->
-<!--                                    <td class="text-left py-3 px-4"><a class="hover:text-blue-500" href="mailto:jonsmith@mail.com">jonsmith@mail.com</a></td>-->
-<!--                                </tr>-->
-<!--                            </tbody>-->
                                 <thead class="bg-gray-800 text-white">
                                 <tr>
                                     <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Pose ID</th>
@@ -113,14 +70,12 @@
                                 </tr>
                                 </thead>
                                 <tbody id="tableBody">
-                                <!-- Data rows will be inserted here -->
                                 </tbody>
                         </table>
                     </div>
                     <div class="w-full mt-6">
                         <nav aria-label="Page navigation">
                             <ul class="flex items-center -space-x-px h-8 text-sm" id="pagination">
-                                <!-- Pagination links will be inserted here -->
                             </ul>
                         </nav>
                     </div>
@@ -135,9 +90,7 @@
         
     </div>
 
-    <!-- AlpineJS -->
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
-    <!-- Font Awesome -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js" integrity="sha256-KzZiKy0DWYsnwMF+X1DvQngQ2/FxF7MF3Ff72XcpuPs=" crossorigin="anonymous"></script>
     <script>
         function populateTable(rows) {
@@ -148,56 +101,47 @@
                 row.addEventListener('click', () => {
                     window.location.href = `details?poseId=${item.poseInfo.poseId}`;
                 });
-                // 행 셀 채우기...
                 tableBody.appendChild(row);
             });
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            fetch('/api/pose/all?pageNumber=0&pageSize=300')
+            fetch('/api/pose/all?pageNumber=0&pageSize=500')
                 .then(response => response.json())
                 .then(data => {
                     const tableBody = document.getElementById('tableBody');
-                    // populateTable(data.content); // 데이터로 테이블을 채웁니다.
                     data.content.forEach(item => {
                         const row = document.createElement('tr');
                         row.classList.add('cursor-pointer', 'hover:bg-gray-100');
 
-                        // Pose ID
                         const poseIdCell = document.createElement('td');
                         poseIdCell.textContent = item.poseInfo.poseId;
                         row.appendChild(poseIdCell);
 
-                        // Image
                         const imageCell = document.createElement('td');
                         const image = document.createElement('img');
                         image.src = item.poseInfo.imageKey;
-                        image.style.width = '100px'; // Adjust the size as needed
+                        image.style.width = '100px';
                         imageCell.appendChild(image);
                         row.appendChild(imageCell);
 
-                        // Source
                         const sourceCell = document.createElement('td');
                         sourceCell.textContent = item.poseInfo.source || 'N/A'; // Show 'N/A' if source is empty
                         row.appendChild(sourceCell);
 
-                        // People Count
                         const peopleCountCell = document.createElement('td');
                         peopleCountCell.textContent = item.poseInfo.peopleCount;
                         row.appendChild(peopleCountCell);
 
-                        // Frame Count
                         const frameCountCell = document.createElement('td');
                         frameCountCell.textContent = item.poseInfo.frameCount;
                         row.appendChild(frameCountCell);
 
-                        // Append the row to the table body
                         tableBody.appendChild(row);
 
                         row.addEventListener('click', () => {
                             window.location.href = `details?poseId=${item.poseInfo.poseId}`;
                         });
-                        // 행 셀 채우기...
                         tableBody.appendChild(row);
                     });
                 })
