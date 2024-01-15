@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 
-public class ImgUploadRequest {
+public class PoseUploadRequest {
 	private String peopleCount;
 	private String frameCount;
 	private String tags;
@@ -15,7 +15,7 @@ public class ImgUploadRequest {
 	private String sourceUrl;
 	private String description;
 
-	public ImgUploadRequest(String peopleCount,String frameCount,String tags,
+	public PoseUploadRequest(String peopleCount,String frameCount,String tags,
 		String source, String sourceUrl, String description) {
 		this.peopleCount= peopleCount;
 		this.frameCount= frameCount;
