@@ -13,8 +13,12 @@ import com.dndoz.PosePicker.Global.entity.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "pose_info")
@@ -48,38 +52,6 @@ public class PoseInfo extends BaseEntity {
 		this.peopleCount = poseInfo.getPeopleCount();
 		this.frameCount = poseInfo.getFrameCount();
 		this.tagAttributes = tagAttributes;
-	}
-
-	public Long getPoseId() {
-		return poseId;
-	}
-
-	public String getImageKey() {
-		return imageKey;
-	}
-
-	public void setImageKey(String imageKey) {
-		this.imageKey = imageKey;
-	}
-
-	public String getSource() {
-		return source;
-	}
-
-	public String getSourceUrl() {
-		return sourceUrl;
-	}
-
-	public Long getPeopleCount() {
-		return peopleCount;
-	}
-
-	public Long getFrameCount() {
-		return frameCount;
-	}
-
-	public String getTagAttributes() {
-		return tagAttributes;
 	}
 }
 
