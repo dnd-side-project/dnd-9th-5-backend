@@ -133,10 +133,11 @@ public class AppleService {
 			userRepository.save(appleUser);
 
 			//토큰 생성
-			AuthTokens token=authTokensGenerator.generate(appleEmail);
+			AuthTokens token=authTokensGenerator.generate(iosId);
 			return new LoginResponse(uid,nickName,appleEmail,token);
 		} else { // 로그인
-			AuthTokens token=authTokensGenerator.generate(appleEmail);
+			iosId= String.valueOf(appleUser.getUid());
+			AuthTokens token=authTokensGenerator.generate(iosId);
 			return new LoginResponse(appleUser.getUid(),nickName,appleEmail,token);
 		}
 	}

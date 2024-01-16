@@ -13,4 +13,6 @@ public interface BookmarkRepository extends JpaRepository<Bookmark,Long> {
 	Optional<Boolean> findByUserAndPoseInfo(User user, PoseInfo poseInfo);
 	//북마크 삭제
 	void deleteByUserAndPoseInfo(User user, PoseInfo poseInfo);
+	//회원탈퇴 시, 북마크 정보 삭제
+	void deleteByUser(User user);
 }
