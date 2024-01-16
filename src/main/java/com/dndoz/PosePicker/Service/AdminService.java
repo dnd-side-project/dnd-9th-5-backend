@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;;
 import com.dndoz.PosePicker.Domain.PoseInfo;
@@ -24,14 +25,15 @@ import com.dndoz.PosePicker.Repository.PoseTagRepository;
 
 @Service
 public class AdminService {
-	private AmazonS3Client amazonS3Client;
+	private final AmazonS3 amazonS3;
 	private final PoseInfoRepository poseInfoRepository;
 	private final PoseTagAttributeRepository poseTagAttributeRepository;
 	private final PoseTagRepository poseTagRepository;
 	private final PoseFilterRepository poseFilterRepository;
 
-	public AdminService(final PoseInfoRepository poseInfoRepository, final PoseTagRepository poseTagRepository,
+	public AdminService(AmazonS3 amazonS3, final PoseInfoRepository poseInfoRepository, final PoseTagRepository poseTagRepository,
 		final PoseFilterRepository poseFilterRepository, final PoseTagAttributeRepository poseTagAttributeRepository) {
+		this.amazonS3 = amazonS3;
 		this.poseInfoRepository = poseInfoRepository;
 		this.poseTagRepository = poseTagRepository;
 		this.poseFilterRepository = poseFilterRepository;
@@ -52,8 +54,8 @@ public class AdminService {
 					+poseDto.getSource()+"[pz]"+poseDto.getSourceUrl()+"[pz]"+poseDto.getDescription()+".jpg";
 
 				System.out.println(uploadFileName);
-				amazonS3Client.putObject(bucketName, uploadFileName, multipartFile.getInputStream(), metadata);
-				return amazonS3Client.getUrl(bucketName, uploadFileName).toString();
+				amazonS3.putObject(bucketName, uploadFileName, multipartFile.getInputStream(), metadata);
+				return amazonS3.getUrl(bucketName, uploadFileName).toString();
 			}
 			else return "null";
 		}
@@ -99,42 +101,5 @@ public class AdminService {
 			} else {
 				return "Pose 업데이트에 실패했습니다. 지정된 pose_id를 찾을 수 없습니다.";
 			}
-		// } catch (IOException e) {
-		// 	throw e;
-		// }
 	}
-	// public String updatePose(PoseUpdateRequest poseDto) throws IOException {
-	// 	List<PoseTagAttribute> poseTagAttributes = poseTagAttributeRepository.findPoseTagAttribute();
-	// 	// attribute = poseDto.getTags();
-	//
-	// 	// @Transactional
-	// 	// public void insertOrUpdateTag(String attribute, Long poseId) {
-	// 	// 	Integer poseTagAttributeId = poseTagAttributeRepository.findByPoseTagAttribute(attribute)
-	// 	// 		.orElseGet(() -> poseTagAttributeRepository.save(new TagAttribute(attribute)));
-	// 	//
-	// 	// 	boolean exists = tagRepository.existsByAttributeIdAndPoseId(tagAttr.getId(), poseId);
-	// 	// 	if (!exists) {
-	// 	// 		PoseTag newTag = new PoseTag(tagAttr.getId(), poseId);
-	// 	// 		tagRepository.save(newTag);
-	// 	// 	}
-	// 	// }
-	//
-	// 	if (!multipartFile.isEmpty()){
-	//
-	// 		ObjectMetadata metadata = new ObjectMetadata();
-	// 		metadata.setContentLength(multipartFile.getSize());
-	// 		metadata.setContentType(multipartFile.getContentType());
-	//
-	// 		String fileType=(multipartFile.getContentType()).substring(6);  //ex) image/png -> png
-	//
-	// 		String uploadFileName = poseDto.getFrameCount()+"[pz]"+poseDto.getFrameCount()+"[pz]"+poseDto.getTags()+"[pz]"
-	// 			+poseDto.getSource()+"[pz]"+poseDto.getSourceUrl()+"[pz]"+poseDto.getDescription()+".jpg";
-	//
-	// 		System.out.println(uploadFileName);
-	// 		amazonS3Client.putObject(bucketName, uploadFileName, multipartFile.getInputStream(), metadata);
-	// 		return amazonS3Client.getUrl(bucketName, uploadFileName).toString();
-	// 	}
-	// 	else return "null";
-	// }
-
 }

@@ -4,8 +4,6 @@ import java.io.IOException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,15 +13,10 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.dndoz.PosePicker.Dto.PoseInfoResponse;
 import com.dndoz.PosePicker.Dto.PoseUpdateRequest;
 import com.dndoz.PosePicker.Dto.PoseUploadRequest;
 import com.dndoz.PosePicker.Service.AdminService;
-import com.dndoz.PosePicker.Service.PoseService;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import lombok.RequiredArgsConstructor;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
@@ -42,13 +35,14 @@ public class AdminController {
 		@RequestPart(value = "peopleCount") String peopleCount,
 		@RequestPart(value = "frameCount") String frameCount,
 		@RequestPart(value = "tags") String tags,
-		@RequestPart(value = "source") String source,
-		@RequestPart(value = "sourceUrl") String sourceUrl,
-		@RequestPart(value = "description") String description,
+		@RequestPart(value = "source", required = false) String source,
+		@RequestPart(value = "sourceUrl", required = false) String sourceUrl,
+		@RequestPart(value = "description", required = false) String description,
 		@RequestPart(value = "file") MultipartFile multipartFile) throws IOException {
-		PoseUploadRequest poseUploadRequest = new PoseUploadRequest(peopleCount, frameCount, tags, source, sourceUrl, description);
+		PoseUploadRequest poseUploadRequest = new PoseUploadRequest(peopleCount, frameCount, tags, source, sourceUrl,
+			description);
 		adminService.uploadPose(poseUploadRequest, multipartFile);
-		return ResponseEntity.status(HttpStatus.CREATED).build(		);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
 	@PutMapping("/pose/{poseId}")
@@ -57,7 +51,7 @@ public class AdminController {
 		@RequestBody PoseUpdateRequest poseDto) throws IOException {
 		poseDto.setPoseId(poseId);
 		adminService.updatePose(poseDto);
-		return ResponseEntity.status(HttpStatus.CREATED).build(		);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
 }
