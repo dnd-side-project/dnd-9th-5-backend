@@ -49,9 +49,11 @@ public class PoseController {
 	@ApiResponses({@ApiResponse(code = 200, message = "포즈 사진 상세 조회 성공"),
 		@ApiResponse(code = 401, message = "접근 권한이 없습니다.")})
 	@ApiOperation(value = "포즈 사진 상세 조회", notes = "사진 클릭 시 포즈 상세 정보")
-	public ResponseEntity<PoseInfoResponse> getPoseInfo(@PathVariable Long pose_id) {
+	public ResponseEntity<PoseInfoResponse> getPoseInfo(
+		@RequestHeader(value = "Authorization", required = false) String accessToken, @PathVariable Long pose_id) throws
+		IllegalAccessException {
 		logger.info("[getPoseInfo] 포즈 사진 상세 조회 요청");
-		return ResponseEntity.ok(poseService.getPoseInfo(pose_id));
+		return ResponseEntity.ok(poseService.getPoseInfo(accessToken,pose_id));
 	}
 
 	/**

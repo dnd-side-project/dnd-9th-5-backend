@@ -8,9 +8,11 @@ import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 
 import com.dndoz.PosePicker.Domain.PoseInfo;
+import com.dndoz.PosePicker.Domain.QBookmark;
 import com.dndoz.PosePicker.Domain.QPoseInfo;
 import com.dndoz.PosePicker.Domain.QPoseTag;
 import com.dndoz.PosePicker.Domain.QPoseTagAttribute;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -126,24 +128,41 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 	}
 
 	@Override
-	public List<PoseInfo> findByFilter(Pageable pageable, Long people_count, Long frame_count, String tags) {
+	public List<PoseInfo> findByFilter(Pageable pageable, Long people_count, Long frame_count, String tags, Long userId) {
 		QPoseInfo qPoseInfo = QPoseInfo.poseInfo;
 		QPoseTag qPoseTag = QPoseTag.poseTag;
 		QPoseTagAttribute qPoseTagAttribute = QPoseTagAttribute.poseTagAttribute;
+		QBookmark qBookmark= QBookmark.bookmark;
 
-		List<PoseInfo> poseInfoList = queryFactory
-			.selectFrom(qPoseInfo)
+		List<Tuple> poseInfoList = queryFactory
+			.select(
+				qPoseInfo,
+				Expressions.cases()
+					.when(
+						qBookmark.user.uid.eq(userId)
+							.and(qBookmark.poseInfo.poseId.eq(qPoseInfo.poseId))
+							.and(qBookmark.user.uid.ne(0L))
+					)
+					.then(Expressions.constant(Boolean.TRUE))
+					.otherwise(Expressions.constant(Boolean.FALSE))
+					.as("bookmarkCheck")
+			)
+			.from(qPoseInfo)
+			.leftJoin(qBookmark)
+			.on(qBookmark.poseInfo.poseId.eq(qPoseInfo.poseId).and(qBookmark.user.uid.eq(userId)))
 			.where(
 				eqPeopleCount(qPoseInfo, people_count),
 				eqFrameCount(qPoseInfo, frame_count)
 			)
+			.groupBy(qPoseInfo.poseId)
 			.orderBy(new OrderSpecifier<>(Order.ASC, Expressions.numberTemplate(Double.class, "rand()")))
 			.fetch();
 
 		List<String> tagsCondition = Arrays.asList(tags.split(","));
 
 		List<PoseInfo> result = new ArrayList<>();
-		for (PoseInfo pi : poseInfoList) {
+		for (Tuple tuple : poseInfoList) {
+			PoseInfo pi = tuple.get(qPoseInfo);
 			List<String> attributes = queryFactory.select(qPoseTagAttribute.attribute)
 				.from(qPoseTag)
 				.join(qPoseTagAttribute)
@@ -152,36 +171,51 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 				.orderBy(qPoseTagAttribute.attributeId.asc())
 				.fetch();
 
-			if (tags.isEmpty() || attributes.containsAll(tagsCondition)) {
+			if (attributes.containsAll(tagsCondition)) {
 				String attributesResult = String.join(",", attributes);
+				boolean bookmarkCheck = tuple.get(1, Boolean.class);
 
-				PoseInfo poseInfo = new PoseInfo(pi, attributesResult);
+				PoseInfo poseInfo = new PoseInfo(pi, attributesResult, bookmarkCheck);
 				result.add(poseInfo);
 			}
-
 		}
 
 		return result;
 	}
 
 	@Override
-	public List<PoseInfo> findByFilterNoTag(Pageable pageable, Long people_count, Long frame_count) {
+	public List<PoseInfo> findByFilterNoTag(Pageable pageable, Long people_count, Long frame_count, Long userId) {
 		QPoseInfo qPoseInfo = QPoseInfo.poseInfo;
 		QPoseTag qPoseTag = QPoseTag.poseTag;
 		QPoseTagAttribute qPoseTagAttribute = QPoseTagAttribute.poseTagAttribute;
+		QBookmark qBookmark= QBookmark.bookmark;
 
-		List<PoseInfo> poseInfoList = queryFactory
-			.selectFrom(qPoseInfo)
-			.groupBy(qPoseInfo.poseId)	//추가
+		List<Tuple> poseInfoList = queryFactory
+			.select(
+				qPoseInfo,
+				Expressions.cases()
+					.when(
+						qBookmark.user.uid.eq(userId)
+							.and(qBookmark.poseInfo.poseId.eq(qPoseInfo.poseId))
+							.and(qBookmark.user.uid.ne(0L))
+					)
+					.then(Expressions.constant(Boolean.TRUE))
+					.otherwise(Expressions.constant(Boolean.FALSE))
+					.as("bookmarkCheck"))
+			.from(qPoseInfo)
+			.leftJoin(qBookmark)
+			.on(qBookmark.poseInfo.poseId.eq(qPoseInfo.poseId).and(qBookmark.user.uid.eq(userId)))
 			.where(
 				eqPeopleCount(qPoseInfo, people_count),
 				eqFrameCount(qPoseInfo, frame_count)
 			)
+			.groupBy(qPoseInfo.poseId)
 			.orderBy(new OrderSpecifier<>(Order.ASC, Expressions.numberTemplate(Double.class, "rand()")))
 			.fetch();
 
 		List<PoseInfo> result = new ArrayList<>();
-		for (PoseInfo pi : poseInfoList) {
+		for (Tuple tuple : poseInfoList) {
+			PoseInfo pi = tuple.get(qPoseInfo);
 			List<String> attributes = queryFactory.select(qPoseTagAttribute.attribute)
 				.from(qPoseTag)
 				.join(qPoseTagAttribute)
@@ -191,7 +225,8 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 				.fetch();
 
 			String attributesResult = String.join(",", attributes);
-			PoseInfo poseInfo = new PoseInfo(pi, attributesResult);
+			boolean bookmarkCheck = tuple.get(1, Boolean.class);
+			PoseInfo poseInfo = new PoseInfo(pi, attributesResult, bookmarkCheck);
 			result.add(poseInfo);
 		}
 
