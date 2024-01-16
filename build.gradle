@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.dnd-oz'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.2-SNAPSHOT'
 
 java {
     sourceCompatibility = '11'
@@ -26,22 +26,35 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    //implementation 'mysql:mysql-connector-java:8.0.28'
+	//implementation 'io.springfox:springfox-boot-starter:3.0.0'
+	//implementation 'mysql:mysql-connector-java:8.0.28'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    implementation 'com.mysql:mysql-connector-j'
-	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+	implementation 'com.mysql:mysql-connector-j'
+	//implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	//implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    //implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
     implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
     implementation 'com.querydsl:querydsl-jpa:5.0.0'
     implementation 'com.querydsl:querydsl-apt:5.0.0'
+	//implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 	implementation group: 'org.json', name: 'json', version: '20160810'
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+
+    //
+    implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+    implementation group: 'org.bouncycastle', name: 'bcpkix-jdk18on', version: '1.72'
+    implementation group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: '9.30.1'
+
+    //feign client
+    //implementation platform("org.springframework.cloud:spring-cloud-dependencies:2021.0.5")
+    //implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
 }
 
 tasks.named('test') {

@@ -6,13 +6,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dndoz.PosePicker.Dto.BookmarkRequest;
+import com.dndoz.PosePicker.Dto.BookmarkResponse;
 import com.dndoz.PosePicker.Dto.PoseInfoResponse;
 import com.dndoz.PosePicker.Service.BookmarkService;
 
@@ -32,28 +32,29 @@ public class BookmarkController {
 	private final BookmarkService bookmarkService;
 
 	@ResponseStatus(HttpStatus.OK)
-	@PostMapping("/")
+	@PostMapping("")
 	@ApiResponse(code = 201, message = "북마크 등록 성공")
 	@ApiOperation(value = "북마크", notes = "북마크 등록")
-	public ResponseEntity<?> insert(@RequestBody BookmarkRequest bookmarkDto) throws Exception {
-		bookmarkService.insert(bookmarkDto);
-		return ResponseEntity.status(HttpStatus.CREATED).build();
+	public ResponseEntity<BookmarkResponse> insert(
+		@RequestHeader(value= "Authorization", required=false) String accessToken, @RequestParam Long poseId) throws Exception {
+		return ResponseEntity.ok(bookmarkService.insert(accessToken, poseId));
 	}
 
-	@DeleteMapping("/")
+	@DeleteMapping("")
 	@ApiResponse(code = 200, message = "북마크 취소 성공")
 	@ApiOperation(value = "북마크", notes = "북마크 취소")
-	public ResponseEntity<?> delete(@RequestBody BookmarkRequest bookmarkDto) throws Exception {
-		bookmarkService.delete(bookmarkDto);
-		return ResponseEntity.status(HttpStatus.OK).build();
+	public ResponseEntity<BookmarkResponse> delete(
+		@RequestHeader(value= "Authorization", required=false) String accessToken, @RequestParam Long poseId) throws Exception {
+		return ResponseEntity.ok(bookmarkService.delete(accessToken, poseId));
 	}
 
 	@GetMapping("/feed")
 	@ApiResponse(code = 200, message = "북마크 리스트 전달 성공")
 	@ApiOperation(value = "포즈 피드", notes = "북마크 리스트 조회")
-	public ResponseEntity<Slice<PoseInfoResponse>> findBookmark(@RequestParam final String uid,
-		@RequestParam final Integer pageNumber, @RequestParam final Integer pageSize) {
-		return ResponseEntity.ok(bookmarkService.findBookmark(uid, pageNumber, pageSize));
+	public ResponseEntity<Slice<PoseInfoResponse>> findBookmark(
+		@RequestHeader(value= "Authorization", required=false) String accessToken,
+		@RequestParam final Integer pageNumber, @RequestParam final Integer pageSize) throws Exception {
+		return ResponseEntity.ok(bookmarkService.findBookmark(accessToken, pageNumber, pageSize));
 	}
 
 }

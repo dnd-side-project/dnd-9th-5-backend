@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -48,9 +49,11 @@ public class PoseController {
 	@ApiResponses({@ApiResponse(code = 200, message = "포즈 사진 상세 조회 성공"),
 		@ApiResponse(code = 401, message = "접근 권한이 없습니다.")})
 	@ApiOperation(value = "포즈 사진 상세 조회", notes = "사진 클릭 시 포즈 상세 정보")
-	public ResponseEntity<PoseInfoResponse> getPoseInfo(@PathVariable Long pose_id) {
+	public ResponseEntity<PoseInfoResponse> getPoseInfo(
+		@RequestHeader(value = "Authorization", required = false) String accessToken, @PathVariable Long pose_id) throws
+		IllegalAccessException {
 		logger.info("[getPoseInfo] 포즈 사진 상세 조회 요청");
-		return ResponseEntity.ok(poseService.getPoseInfo(pose_id));
+		return ResponseEntity.ok(poseService.getPoseInfo(accessToken,pose_id));
 	}
 
 	/**
@@ -100,10 +103,12 @@ public class PoseController {
 	@GetMapping("/all")
 	@ApiResponse(code = 200, message = "전체 포즈 피드 리스트 전달 성공")
 	@ApiOperation(value = "포즈 피드", notes = "전체 포즈 피드 정보를 제공합니다.")
-	public ResponseEntity<Slice<PoseInfoResponse>> getPoses(@RequestParam final Integer pageNumber,
-		@RequestParam final Integer pageSize) {
+	public ResponseEntity<?> getPoses(
+		@RequestHeader(value = "Authorization", required = false) String accessToken,
+		@RequestParam final Integer pageNumber, @RequestParam final Integer pageSize) throws IllegalAccessException {
 		logger.info("[getPoses] 포즈 태그 속성 정보 요청");
-		return ResponseEntity.ok(poseService.findPoses(pageNumber, pageSize));
+		Slice<PoseInfoResponse> poses = poseService.findPoses(accessToken, pageNumber, pageSize);
+		return ResponseEntity.ok(poses);
 	}
 
 	/**
@@ -120,14 +125,15 @@ public class PoseController {
 
 	})
 	public ResponseEntity<PoseFeedResponse> getPoseFeed(
+		@RequestHeader(value= "Authorization", required=false) String accessToken,
 		@RequestParam(value = "pageNumber", required = false) final Integer pageNumber,
 		@RequestParam(value = "peopleCount", required = false) final Long peopleCount,
 		@RequestParam(value = "frameCount", required = false) final Long frameCount,
-		@RequestParam(value = "tags", required = false) final String tags) {
+		@RequestParam(value = "tags", required = false) final String tags) throws IllegalAccessException {
 		logger.info("[getPoseFeed] 포즈 피드 리스트 요청");
 
 		return ResponseEntity.ok(
-			poseService.getPoseFeed(new PoseFeedRequest(pageNumber, peopleCount, frameCount, tags)));
+			poseService.getPoseFeed(accessToken, new PoseFeedRequest(pageNumber, peopleCount, frameCount, tags)));
 	}
 }
 

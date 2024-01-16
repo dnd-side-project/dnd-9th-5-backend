@@ -1,5 +1,13 @@
 package com.dndoz.PosePicker.Auth;
 
+import java.security.Key;
+import java.util.Date;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -10,49 +18,35 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import java.security.Key;
-import java.util.Date;
-
 @Component
-public class JwtTokenProvider {
+public class PPJwtTokenProvider {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final Key key;
+	private final Key pz_key;
 
-    public JwtTokenProvider(@Value("${custom.jwt.secretKey}") String secretKey) {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
-    }
+	public PPJwtTokenProvider(@Value("${custom.jwt.posepickerKey}") String secretKey) {
+		byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+		this.pz_key = Keys.hmacShaKeyFor(keyBytes);
+	}
 
-    public String accessTokenGenerate(String subject, Date expiredAt) {
-        return Jwts.builder()
-                .setSubject(subject)	//uid
-                .setExpiration(expiredAt)
-                .signWith(key, SignatureAlgorithm.HS512)
-                .compact();
-    }
-	public String refreshTokenGenerate(Date expiredAt) {
+	public String posePickerTokenGenerate(Date expiredAt) {
 		return Jwts.builder()
+			.setSubject("posePickerLogin")
 			.setExpiration(expiredAt)
-			.signWith(key, SignatureAlgorithm.HS512)
+			.signWith(pz_key, SignatureAlgorithm.HS512)
 			.compact();
 	}
 
-	public String extractUid(String accessToken) {
-		Claims claims = parseClaims(accessToken);
+	public String extractSubject(String token) {
+		Claims claims = parseClaims2(token);
 		return claims.getSubject();
 	}
 
-	private Claims parseClaims(String accessToken) {
+	private Claims parseClaims2(String token) {
 		try {
 			return Jwts.parserBuilder()
-				.setSigningKey(key)
+				.setSigningKey(pz_key)
 				.build()
-				.parseClaimsJws(accessToken)
+				.parseClaimsJws(token)
 				.getBody();
 		} catch (ExpiredJwtException e) {
 			return e.getClaims();
@@ -62,7 +56,7 @@ public class JwtTokenProvider {
 	//유효한 토큰인지 확인
 	public boolean validateToken(String token) throws IllegalAccessException{
 		try {
-			Jws<Claims> claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token);
+			Jws<Claims> claims = Jwts.parser().setSigningKey(pz_key).parseClaimsJws(token);
 			return !claims.getBody().getExpiration().before(new Date());
 		} catch (ExpiredJwtException e) {
 			// 토큰이 만료된 경우
@@ -83,11 +77,4 @@ public class JwtTokenProvider {
 		}
 	}
 
-	// 헤더에서 Bearer 토큰 부분 추출하는 메서드
-	public String extractJwtToken(String authorizationHeader) {
-		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-			return authorizationHeader.substring(7);
-		}
-		return null;
-	}
 }

@@ -14,11 +14,17 @@ public enum ErrorCode {
     BAD_REQUEST(400, "C007", " Bad Request"),
     UNSUPPORTED_MEDIA_TYPE(415, "C008", "UNSUPPORTED_MEDIA_TYPE"),
     FILE_SIZE_EXCEED(416, "C009", "REQUESTED_RANGE_NOT_SATISFIABLE"),
-    EXPECTATION_FAILED(417, "C010", "EXPECTATION_FAILED")
+    EXPECTATION_FAILED(417, "C010", "EXPECTATION_FAILED"),
+	//JWT 토큰 ErrorCode
+	UNSUPPORTED_JWT_TOKEN(401,"C011","UnsupportedJwtException 지원되지 않는 토큰"),
+	MALFORMED_JWT_TOKEN(401,"C012","MalformedJwtException 잘못된 jwt 구조"),
+	EXPIRED_JWT_TOKEN(401,"C013","ExpiredJwtException 토큰 만료"),
+	UNAUTHORIZED_JWT_TOKEN(401,"C014","Unauthorized"),
+
+	BOOKMARK_BAD_REQUEST(400,"C015","북마크 API 잘못된 요청")
+	;
 
 
-
-    ;
     private final String code;
     private final String message;
     private int status;
@@ -40,6 +46,4 @@ public enum ErrorCode {
     public int getStatus() {
         return status;
     }
-
-
 }

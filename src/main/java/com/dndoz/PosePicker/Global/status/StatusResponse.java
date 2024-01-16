@@ -2,6 +2,8 @@ package com.dndoz.PosePicker.Global.status;
 
 import java.net.URI;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
@@ -11,6 +13,7 @@ import lombok.NoArgsConstructor;
 
 @ApiModel(value = "모델 태그 정보")
 @Getter
+@JsonInclude(JsonInclude.Include.NON_NULL) // Null 값인 필드 제외하고 보내기
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class StatusResponse {

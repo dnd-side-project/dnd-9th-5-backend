@@ -17,8 +17,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "pose_info")
@@ -43,7 +41,11 @@ public class PoseInfo extends BaseEntity {
 	@Transient
 	private String tagAttributes;
 
-	public PoseInfo(PoseInfo poseInfo, String tagAttributes) {
+	@Transient
+	private boolean bookmarkCheck; //북마크 여부
+
+	//포즈피드 필터링 시 북마크 여부 포함한 PoseInfo
+	public PoseInfo(PoseInfo poseInfo, String tagAttributes, Boolean bookmarkCheck) {
 		this.poseId = poseInfo.getPoseId();
 		this.imageKey = poseInfo.getImageKey();
 		this.source = poseInfo.getSource();
@@ -52,6 +54,47 @@ public class PoseInfo extends BaseEntity {
 		this.peopleCount = poseInfo.getPeopleCount();
 		this.frameCount = poseInfo.getFrameCount();
 		this.tagAttributes = tagAttributes;
+		this.bookmarkCheck=bookmarkCheck;
+	}
+
+	public Long getPoseId() {
+		return poseId;
+	}
+
+	public String getImageKey() {
+		return imageKey;
+	}
+
+	public void setImageKey(String imageKey) {
+		this.imageKey = imageKey;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public String getSourceUrl() {
+		return sourceUrl;
+	}
+
+	public Long getPeopleCount() {
+		return peopleCount;
+	}
+
+	public Long getFrameCount() {
+		return frameCount;
+	}
+
+	public String getTagAttributes() {
+		return tagAttributes;
+	}
+
+	public boolean isBookmarkCheck() {
+		return bookmarkCheck;
+	}
+
+	public void setBookmarkCheck(boolean bookmarkCheck) {
+		this.bookmarkCheck = bookmarkCheck;
 	}
 }
 
