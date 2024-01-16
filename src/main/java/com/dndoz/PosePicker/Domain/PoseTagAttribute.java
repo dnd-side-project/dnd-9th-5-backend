@@ -12,13 +12,17 @@ import com.dndoz.PosePicker.Global.entity.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @ApiModel(value = "포즈 태그 속성 모델: PoseTagAttribute")
 @AllArgsConstructor
 @Entity(name = "tag_attribute")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
 @Table(name = "tag_attribute")
+@Getter
+@Setter
 public class PoseTagAttribute extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
