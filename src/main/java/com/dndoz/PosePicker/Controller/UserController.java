@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.NoSuchElementException;
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,9 +31,11 @@ public class UserController {
     @ResponseBody
     @GetMapping("/login/oauth/kakao")
 	@ApiOperation(value = "웹 카카오 로그인", notes = "웹 프론트 버전 카카오 로그인")
-    public ResponseEntity<LoginResponse> kakaoLogin(@RequestParam String code){
+    public ResponseEntity<LoginResponse> kakaoLogin(@RequestParam String code, HttpServletRequest request){
         try{
-            return ResponseEntity.ok(kakaoService.kakaoLogin(code));
+			// 현재 도메인 확인
+			String currentDomain = request.getServerName();
+            return ResponseEntity.ok(kakaoService.kakaoLogin(code, currentDomain));
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Item Not Found");
         }

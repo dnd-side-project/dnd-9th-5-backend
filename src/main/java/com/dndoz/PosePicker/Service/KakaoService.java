@@ -18,6 +18,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,7 +35,9 @@ import java.util.HashMap;
 @Service
 @RequiredArgsConstructor
 public class KakaoService {
-    private final UserRepository userRepository;
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+	private final UserRepository userRepository;
     private final AuthTokensGenerator authTokensGenerator;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final PPJwtTokenProvider psJwTokenProvider;
@@ -77,9 +81,12 @@ public class KakaoService {
 	}
 
 	/** [2] Web 버전 카카오 로그인 **/
-    public LoginResponse kakaoLogin(String code) {
+    public LoginResponse kakaoLogin(String code, String currentDomain) {
+    	//0. 동적으로 redirect URI 선택
+		String redirectUri=selectRedirectUri(currentDomain);
+
         // 1. "인가 코드"로 "액세스 토큰" 요청
-        String accessToken = getAccessToken(code);
+        String accessToken = getAccessToken(code, redirectUri);
 
         // 2. 토큰으로 카카오 API 호출
         HashMap<String, Object> userInfo= getKakaoUserInfo(accessToken);
@@ -92,11 +99,32 @@ public class KakaoService {
 
     @Value("${kakao.key.client-id}")
     private String clientId;
-    @Value("${kakao.redirect-uri}")
-    private String redirectUri;
+	@Value("${kakao.redirect-uri.main}")
+	private String isFirstDomain;
+    @Value("${kakao.redirect-uri.develop}")
+    private String isSecondDomain;
+	@Value("${kakao.redirect-uri.local}")
+	private String isThirdDomain;
+
+	//0. 도메인에 따라 동적으로 redirect URI 선택
+	private String selectRedirectUri(String currentDomain) {
+		logger.info("[dynamicRedirectUri] 카카오 로그인 Uri 요청");
+		logger.info(currentDomain);
+		String dynamicRedirectUri = "";
+
+		if ("posepicker.site".equals(currentDomain)) {
+			dynamicRedirectUri=isFirstDomain;
+		} else if ("api-posepicker.site".equals(currentDomain)) {
+			dynamicRedirectUri=isSecondDomain;
+		} else if ("localhost".equals(currentDomain)){ //localhost
+			dynamicRedirectUri=isThirdDomain;
+		}
+		logger.info(dynamicRedirectUri);
+		return dynamicRedirectUri;
+	}
 
     //1. "인가 코드"로 "액세스 토큰" 요청
-    private String getAccessToken(String code) {
+    private String getAccessToken(String code, String redirectUri) {
 
         // HTTP Header 생성
         HttpHeaders headers = new HttpHeaders();
@@ -156,7 +184,6 @@ public class KakaoService {
         JsonNode jsonNode = null;
         try {
             jsonNode = objectMapper.readTree(responseBody);
-            //System.out.println(jsonNode);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
