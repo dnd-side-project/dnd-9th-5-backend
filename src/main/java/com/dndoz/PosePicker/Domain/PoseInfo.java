@@ -8,7 +8,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import com.dndoz.PosePicker.Dto.PoseInfoAndBookmarkResponse;
 import com.dndoz.PosePicker.Global.entity.BaseEntity;
 
 import io.swagger.annotations.ApiModel;
@@ -55,17 +54,18 @@ public class PoseInfo extends BaseEntity {
 		this.tagAttributes = tagAttributes;
 	}
 
-	// public PoseInfo(PoseInfo poseInfo, String tagAttributes, Boolean bookmarkCheck) {
-	// 	this.poseId = poseInfo.getPoseId();
-	// 	this.imageKey = poseInfo.getImageKey();
-	// 	this.source = poseInfo.getSource();
-	// 	this.sourceUrl = poseInfo.getSourceUrl();
-	// 	this.poseId = poseInfo.getPoseId();
-	// 	this.peopleCount = poseInfo.getPeopleCount();
-	// 	this.frameCount = poseInfo.getFrameCount();
-	// 	this.tagAttributes = tagAttributes;
-	// 	this.bookmarkCheck=bookmarkCheck;
-	// }
+	//포즈피드 필터링 시 북마크 여부 포함한 PoseInfo
+	public PoseInfo(PoseInfo poseInfo, String tagAttributes, Boolean bookmarkCheck) {
+		this.poseId = poseInfo.getPoseId();
+		this.imageKey = poseInfo.getImageKey();
+		this.source = poseInfo.getSource();
+		this.sourceUrl = poseInfo.getSourceUrl();
+		this.poseId = poseInfo.getPoseId();
+		this.peopleCount = poseInfo.getPeopleCount();
+		this.frameCount = poseInfo.getFrameCount();
+		this.tagAttributes = tagAttributes;
+		this.bookmarkCheck=bookmarkCheck;
+	}
 
 	public Long getPoseId() {
 		return poseId;
