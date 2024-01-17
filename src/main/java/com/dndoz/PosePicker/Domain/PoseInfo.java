@@ -22,6 +22,8 @@ import lombok.Setter;
 @Entity(name = "pose_info")
 @Table(name = "pose_info")
 @ApiModel(value = "포즈 이미지 모델: PoseInfo")
+@Getter
+@Setter
 public class PoseInfo extends BaseEntity {
 	@Column(name = "image_key")
 	String imageKey;
@@ -89,7 +91,7 @@ public class PoseInfo extends BaseEntity {
 		return tagAttributes;
 	}
 
-	public boolean isBookmarkCheck() {
+	public boolean getBookmarkCheck() {
 		return bookmarkCheck;
 	}
 

@@ -50,7 +50,7 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 			.fetch();
 
 		String attributesResult = String.join(",", attributes);
-		PoseInfo poseInfo = new PoseInfo(pi, attributesResult);
+		PoseInfo poseInfo = new PoseInfo(pi, attributesResult, pi.getBookmarkCheck());
 
 		return Optional.ofNullable(poseInfo);
 	}
@@ -78,7 +78,7 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 			.fetch();
 
 		String attributesResult = String.join(",", attributes);
-		PoseInfo poseInfo = new PoseInfo(randomPoseInfo, attributesResult);
+		PoseInfo poseInfo = new PoseInfo(randomPoseInfo, attributesResult, randomPoseInfo.getBookmarkCheck());
 
 		return Optional.ofNullable(poseInfo);
 	}
@@ -116,7 +116,7 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 				if (attributes.containsAll(tagsCondition)) {
 					String attributesResult = String.join(",", attributes);
 
-					PoseInfo poseInfo = new PoseInfo(pi, attributesResult);
+					PoseInfo poseInfo = new PoseInfo(pi, attributesResult, pi.getBookmarkCheck());
 					result.add(poseInfo);
 				}
 				if (result.size() > 4)
@@ -256,7 +256,7 @@ public class PoseFilterRepositoryImpl implements PoseFilterRepositoryCustom {
 				.fetch();
 
 			String attributesResult = String.join(",", attributes);
-			PoseInfo poseInfo = new PoseInfo(pi, attributesResult);
+			PoseInfo poseInfo = new PoseInfo(pi, attributesResult, pi.getBookmarkCheck());
 			result.add(poseInfo);
 		}
 
