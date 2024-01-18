@@ -182,7 +182,7 @@ public class PoseService {
 
 		if (getRecommendationCheck) {
 			if (poseFeedRequest.getPageNumber() == 0) {
-				recommendedPoseInfo = poseFilterRepository.getRecommendedContents(pageable);
+				recommendedPoseInfo = poseFilterRepository.getRecommendedContents(pageable,userId);
 			}
 
 			endIdx = Math.min(recommendedPoseInfo.size(), (int)pageable.getOffset() + pageable.getPageSize());
