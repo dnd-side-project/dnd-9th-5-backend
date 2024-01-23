@@ -1,7 +1,11 @@
 package com.dndoz.PosePicker.Dto;
 
 import io.swagger.annotations.ApiModel;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @ApiModel(value = "포즈 피드 리스트 응답: PoseFeedRequest")
 public class PoseFeedRequest {
 	private Integer pageNumber = 0;

@@ -152,11 +152,14 @@ public class PoseService {
 		Slice<PoseInfo> slicedRecommenededPoseInfo;
 		List<PoseInfo> slicedRecommenededResult;
 
+		if (poseFeedRequest.getTags() != null && poseFeedRequest.getTags().equals("")){
+			poseFeedRequest.setTags(null);
+		}
 		Boolean getRecommendationCheck = poseFilterRepository.getRecommendationCheck(poseFeedRequest.getPeopleCount(),
 			poseFeedRequest.getFrameCount(), poseFeedRequest.getTags());
 
 		if (poseFeedRequest.getPageNumber() == 0) {
-			if (null==poseFeedRequest.getTags()) {
+			if (poseFeedRequest.getTags() == null) {
 				logger.info("[태그 요청] tags is NULL");
 				filteredPoseInfo= poseFilterRepository.findByFilterNoTag(pageable, poseFeedRequest.getPeopleCount(),
 					poseFeedRequest.getFrameCount(), userId);
@@ -179,7 +182,7 @@ public class PoseService {
 
 		if (getRecommendationCheck) {
 			if (poseFeedRequest.getPageNumber() == 0) {
-				recommendedPoseInfo = poseFilterRepository.getRecommendedContents(pageable);
+				recommendedPoseInfo = poseFilterRepository.getRecommendedContents(pageable,userId);
 			}
 
 			endIdx = Math.min(recommendedPoseInfo.size(), (int)pageable.getOffset() + pageable.getPageSize());
