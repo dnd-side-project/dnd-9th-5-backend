@@ -31,7 +31,7 @@
         </div>
         <nav class="text-white text-base font-semibold pt-3">
             <a href="tables" class="flex items-center text-white opacity-75 hover:opacity-100 py-4 pl-6 nav-item">
-                <i class="fas fa-table mr-3"></i>
+            <i class="fas fa-table mr-3"></i>
                 포즈 전체 보기
             </a>
             <a href="forms" class="flex items-center text-white opacity-75 hover:opacity-100 py-4 pl-6 nav-item">
@@ -52,23 +52,21 @@
     <div class="relative w-full flex flex-col h-screen overflow-y-hidden">
         <div class="w-full h-screen overflow-x-hidden border-t flex flex-col">
             <main class="w-full flex-grow p-6">
-                <h1 class="text-3xl text-black pb-6">PoseInfo</h1>
+                <h1 class="text-3xl text-black pb-6">PoseTalk</h1>
 
                 <div class="w-full mt-6">
                     <p class="text-xl pb-3 flex items-center">
-                        <i class="fas fa-list mr-3"></i> 포즈 정보 전체 보기
+                        <i class="fas fa-list mr-3"></i> 포즈톡 전체 보기
                     </p>
                     <div class="bg-white overflow-auto">
                         <table class="min-w-full bg-white">
-                                <thead class="bg-gray-800 text-white">
-                                <tr>
-                                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Pose ID</th>
-                                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Image</th>
-                                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Source</th>
-                                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">People Count</th>
-                                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Frame Count</th>
-                                </tr>
-                                </thead>
+                            <thead class="bg-gray-800 text-white">
+                            <tr>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Word ID</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Content</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Action</th> <!-- 수정 버튼 추가 -->
+                            </tr>
+                            </thead>
                                 <tbody id="tableBody">
                                 </tbody>
                         </table>
@@ -93,62 +91,65 @@
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js" integrity="sha256-KzZiKy0DWYsnwMF+X1DvQngQ2/FxF7MF3Ff72XcpuPs=" crossorigin="anonymous"></script>
     <script>
-        function populateTable(rows) {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
-            rows.forEach(item => {
-                const row = document.createElement('tr');
-                row.addEventListener('click', () => {
-                    window.location.href = `details?poseId=${item.poseInfo.poseId}`;
-                });
-                tableBody.appendChild(row);
-            });
+        function toggleEdit(row) {
+            const wordIdCell = row.cells[0];
+            const contentCell = row.cells[1];
+            const actionCell = row.cells[2];
+
+            if (actionCell.dataset.editing === 'false') {
+                const content = contentCell.textContent;
+                contentCell.innerHTML = `<input type="text" class="border rounded px-2 py-1 w-full" value="${content}">`;
+                actionCell.innerHTML = '<button class="bg-green-500 text-white px-2 py-1 rounded" onclick="saveEdit(this)">Save</button>';
+                actionCell.dataset.editing = 'true';
+            } else {
+                const newContent = contentCell.querySelector('input').value;
+                const wordId = wordIdCell.textContent;
+
+                // API로 수정된 내용 저장
+                fetch(`/api/admin/pose/${wordId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ content: newContent })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            contentCell.textContent = newContent;
+                            actionCell.innerHTML = '<button class="bg-blue-500 text-white px-2 py-1 rounded" onclick="toggleEdit(this.parentNode.parentNode)">Edit</button>';
+                            actionCell.dataset.editing = 'false';
+                        } else {
+                            alert('내용을 저장하는 동안 오류가 발생했습니다.');
+                        }
+                    })
+                    .catch(error => console.error('API 요청 오류:', error));
+            }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/api/pose/all?pageNumber=0&pageSize=500')
-                .then(response => response.json())
-                .then(data => {
-                    const tableBody = document.getElementById('tableBody');
-                    data.content.forEach(item => {
-                        const row = document.createElement('tr');
-                        row.classList.add('cursor-pointer', 'hover:bg-gray-100');
+        function saveEdit(button) {
+            const row = button.parentNode.parentNode;
+            toggleEdit(row);
+        }
 
-                        const poseIdCell = document.createElement('td');
-                        poseIdCell.textContent = item.poseInfo.poseId;
-                        row.appendChild(poseIdCell);
+        fetch('/api/admin/pose/talk')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('tableBody');
+                data.forEach(item => {
+                    const row = tableBody.insertRow(-1);
+                    const wordIdCell = row.insertCell(0);
+                    const contentCell = row.insertCell(1);
+                    const actionCell = row.insertCell(2);
 
-                        const imageCell = document.createElement('td');
-                        const image = document.createElement('img');
-                        image.src = item.poseInfo.imageKey;
-                        image.style.width = '100px';
-                        imageCell.appendChild(image);
-                        row.appendChild(imageCell);
+                    wordIdCell.textContent = item.poseWord.wordId;
+                    contentCell.textContent = item.poseWord.content;
 
-                        const sourceCell = document.createElement('td');
-                        sourceCell.textContent = item.poseInfo.source || 'N/A'; // Show 'N/A' if source is empty
-                        row.appendChild(sourceCell);
-
-                        const peopleCountCell = document.createElement('td');
-                        peopleCountCell.textContent = item.poseInfo.peopleCount;
-                        row.appendChild(peopleCountCell);
-
-                        const frameCountCell = document.createElement('td');
-                        frameCountCell.textContent = item.poseInfo.frameCount;
-                        row.appendChild(frameCountCell);
-
-                        tableBody.appendChild(row);
-
-                        row.addEventListener('click', () => {
-                            window.location.href = `details?poseId=${item.poseInfo.poseId}`;
-                        });
-                        tableBody.appendChild(row);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching data: ', error);
+                    actionCell.innerHTML = '<button class="bg-blue-500 text-white px-2 py-1 rounded" onclick="toggleEdit(this.parentNode.parentNode)">Edit</button>';
+                    actionCell.dataset.editing = 'false';
                 });
-        });
+            })
+            .catch(error => console.error('API 요청 오류:', error));
     </script>
 
 </body>

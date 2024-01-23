@@ -1,7 +1,9 @@
 package com.dndoz.PosePicker.Service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -9,32 +11,34 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;;
 import com.dndoz.PosePicker.Domain.PoseInfo;
 import com.dndoz.PosePicker.Domain.PoseTag;
 import com.dndoz.PosePicker.Domain.PoseTagAttribute;
 import com.dndoz.PosePicker.Dto.PoseInfoResponse;
+import com.dndoz.PosePicker.Dto.PoseTalkResponse;
 import com.dndoz.PosePicker.Dto.PoseUploadRequest;
 import com.dndoz.PosePicker.Dto.PoseUpdateRequest;
 import com.dndoz.PosePicker.Repository.PoseFilterRepository;
 import com.dndoz.PosePicker.Repository.PoseInfoRepository;
 import com.dndoz.PosePicker.Repository.PoseTagAttributeRepository;
 import com.dndoz.PosePicker.Repository.PoseTagRepository;
-
+import com.dndoz.PosePicker.Repository.PoseTalkRepository;
 
 @Service
 public class AdminService {
 	private final AmazonS3 amazonS3;
 	private final PoseInfoRepository poseInfoRepository;
+	private final PoseTalkRepository poseTalkRepository;
 	private final PoseTagAttributeRepository poseTagAttributeRepository;
 	private final PoseTagRepository poseTagRepository;
 	private final PoseFilterRepository poseFilterRepository;
 
-	public AdminService(AmazonS3 amazonS3, final PoseInfoRepository poseInfoRepository, final PoseTagRepository poseTagRepository,
+	public AdminService(AmazonS3 amazonS3, final PoseInfoRepository poseInfoRepository, final PoseTalkRepository poseTalkRepository, final PoseTagRepository poseTagRepository,
 		final PoseFilterRepository poseFilterRepository, final PoseTagAttributeRepository poseTagAttributeRepository) {
 		this.amazonS3 = amazonS3;
 		this.poseInfoRepository = poseInfoRepository;
+		this.poseTalkRepository = poseTalkRepository;
 		this.poseTagRepository = poseTagRepository;
 		this.poseFilterRepository = poseFilterRepository;
 		this.poseTagAttributeRepository = poseTagAttributeRepository;
@@ -101,5 +105,13 @@ public class AdminService {
 			} else {
 				return "Pose 업데이트에 실패했습니다. 지정된 pose_id를 찾을 수 없습니다.";
 			}
+	}
+
+	public List<PoseTalkResponse> getPoseTalk() {
+		return poseTalkRepository.findAllPoseTalk()
+			.stream()
+			.map(poseTalk -> new PoseTalkResponse(poseTalk))
+			.collect(Collectors.toList());
+
 	}
 }
