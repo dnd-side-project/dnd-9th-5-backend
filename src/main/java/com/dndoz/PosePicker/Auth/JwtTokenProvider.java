@@ -20,6 +20,8 @@ import java.security.Key;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import com.dndoz.PosePicker.Global.error.exception.CustomTokenException;
+
 @Component
 public class JwtTokenProvider {
 	private final RedisTemplate<String, String> redisTemplate;
@@ -79,6 +81,10 @@ public class JwtTokenProvider {
 	public boolean validateToken(String token) throws IllegalAccessException{
 		try {
 			Jws<Claims> claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token);
+			//Redis에 있는 엑세스 토큰인 경우 로그아웃 처리된 엑세스 토큰임.
+			if (hasKeyBlackList(token)){
+				throw new CustomTokenException("로그아웃 된 토큰 입니다");
+			}
 			return !claims.getBody().getExpiration().before(new Date());
 		} catch (ExpiredJwtException e) {
 			// 토큰이 만료된 경우
@@ -110,5 +116,18 @@ public class JwtTokenProvider {
 	//redis key(refreshToken) 값을 찾아 value (uid)를 반환하는 메서드 (재발급, 로그아웃)
 	public String findRefreshToken(String refreshToken) {
 		return redisTemplate.opsForValue().get("refresh:"+refreshToken);
+	}
+
+	//로그아웃 된 accessToken 여부 확인
+	private boolean hasKeyBlackList(String token) {
+		return redisTemplate.hasKey(token);
+	}
+
+	//JWT 토큰의 만료시간
+	public Long getExpiration(String accessToken){
+		Date expiration = Jwts.parserBuilder().setSigningKey(key)
+			.build().parseClaimsJws(accessToken).getBody().getExpiration();
+		long now = new Date().getTime();
+		return expiration.getTime() - now;
 	}
 }

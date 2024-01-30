@@ -7,6 +7,7 @@ import com.dndoz.PosePicker.Auth.PPJwtTokenProvider;
 import com.dndoz.PosePicker.Domain.User;
 import com.dndoz.PosePicker.Dto.KakaoLoginRequest;
 import com.dndoz.PosePicker.Dto.LoginResponse;
+import com.dndoz.PosePicker.Dto.LogoutRequest;
 import com.dndoz.PosePicker.Dto.PPTokenResponse;
 import com.dndoz.PosePicker.Global.status.StatusCode;
 import com.dndoz.PosePicker.Global.status.StatusResponse;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -31,6 +33,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +44,7 @@ public class KakaoService {
     private final AuthTokensGenerator authTokensGenerator;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final PPJwtTokenProvider psJwTokenProvider;
+	private final RedisTemplate<String, String> redisTemplate;
 	private final BookmarkRepository bookmarkRepository;
 
 	/** [1] ios 버전 카카오 로그인 **/
@@ -220,6 +224,28 @@ public class KakaoService {
         AuthTokens token=authTokensGenerator.generate(uid.toString());
         return new LoginResponse(uid,nickName,kakaoEmail,token);
     }
+
+    //로그아웃 하기
+	public StatusResponse logout(LogoutRequest logoutRequest) throws IllegalAccessException {
+		String accessToken=jwtTokenProvider.extractJwtToken(logoutRequest.getAccessToken());
+		String refreshToken=jwtTokenProvider.extractJwtToken(logoutRequest.getRefreshToken());
+
+		if (! (jwtTokenProvider.validateToken(accessToken) || jwtTokenProvider.validateToken(refreshToken))) {
+			return null;
+		}
+		String uid= jwtTokenProvider.extractUid(accessToken);
+		logger.info("[로그아웃 시 uid 확인] "+ jwtTokenProvider.findRefreshToken(refreshToken));
+
+		//Redis 에 해당 refreshToken 으로 저장된 uid 있는지 여부 확인
+		if (jwtTokenProvider.findRefreshToken(refreshToken).equals(uid) || jwtTokenProvider.findRefreshToken(refreshToken) !=null) {
+			redisTemplate.delete("refresh:"+refreshToken); //refresh Token 삭제
+		}
+		// 해당 Access Token 유효시간을 가지고 와서 BlackList 에 저장하기
+		Long expiration = jwtTokenProvider.getExpiration(accessToken);
+		redisTemplate.opsForValue().set(accessToken,"logout", expiration, TimeUnit.MILLISECONDS);
+
+		return new StatusResponse(StatusCode.OK,"로그아웃 성공");
+	}
 
     //탈퇴하기
 	public StatusResponse signOut(String accessToken) throws IllegalAccessException {

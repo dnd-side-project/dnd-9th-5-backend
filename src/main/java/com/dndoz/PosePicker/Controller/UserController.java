@@ -2,6 +2,7 @@ package com.dndoz.PosePicker.Controller;
 
 import com.dndoz.PosePicker.Dto.KakaoLoginRequest;
 import com.dndoz.PosePicker.Dto.LoginResponse;
+import com.dndoz.PosePicker.Dto.LogoutRequest;
 import com.dndoz.PosePicker.Dto.PPTokenResponse;
 import com.dndoz.PosePicker.Global.status.StatusResponse;
 import com.dndoz.PosePicker.Service.AppleService;
@@ -67,6 +68,16 @@ public class UserController {
 		try{
 			return ResponseEntity.ok(appleService.appleLogin(idToken));
 		} catch (NoSuchElementException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Item Not Found");
+		}
+	}
+
+	@PatchMapping("/logout")
+	@ApiOperation(value = "로그아웃", notes = "로그아웃 하기")
+	public ResponseEntity<StatusResponse> logout(@RequestBody LogoutRequest logoutRequest) {
+		try{
+			return ResponseEntity.ok(kakaoService.logout(logoutRequest));
+		} catch (NoSuchElementException | IllegalAccessException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Item Not Found");
 		}
 	}

@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartException;
 
 import com.dndoz.PosePicker.Global.error.exception.BookmarkException;
 import com.dndoz.PosePicker.Global.error.exception.BusinessException;
+import com.dndoz.PosePicker.Global.error.exception.CustomTokenException;
 import com.dndoz.PosePicker.Global.error.exception.ErrorCode;
 
 
@@ -152,4 +153,19 @@ public class GlobalExceptionHandler {
 		final ErrorResponse response = ErrorResponse.of(ErrorCode.BOOKMARK_BAD_REQUEST);
 		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
+
+	//로그아웃 & 토큰 재발급 시 에러
+	@ExceptionHandler(CustomTokenException.class)
+	public ResponseEntity<ErrorResponse> handleCustomTokenException(CustomTokenException e) {
+    	if (e.getMessage().equals("로그아웃 된 토큰 입니다")) {
+			final ErrorResponse response = ErrorResponse.of(ErrorCode.LOGOUT_JWT_TOKEN);
+			return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+		}
+    	//일치하는 refreshToken 존재X
+    	else {
+			final ErrorResponse response = ErrorResponse.of(ErrorCode.ENTITY_NOT_FOUND_JWT_TOKEN);
+			return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+		}
+	}
+
 }
