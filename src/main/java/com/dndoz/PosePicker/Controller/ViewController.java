@@ -24,4 +24,9 @@ public class ViewController {
 	public String detailsPage() {
 		return "details";
 	}
+
+	@GetMapping("/talks")
+	public String talksPage() {
+		return "talks";
+	}
 }

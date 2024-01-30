@@ -1,9 +1,11 @@
 package com.dndoz.PosePicker.Controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.dndoz.PosePicker.Dto.PoseTalkResponse;
 import com.dndoz.PosePicker.Dto.PoseUpdateRequest;
 import com.dndoz.PosePicker.Dto.PoseUploadRequest;
 import com.dndoz.PosePicker.Service.AdminService;
@@ -54,4 +57,8 @@ public class AdminController {
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
+	@GetMapping("/pose/talk")
+	public ResponseEntity<List<PoseTalkResponse>> getPoseTalk() throws IOException {
+		return ResponseEntity.ok(adminService.getPoseTalk());
+	}
 }
