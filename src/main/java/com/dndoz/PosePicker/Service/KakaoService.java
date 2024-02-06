@@ -248,7 +248,7 @@ public class KakaoService {
 	}
 
     //탈퇴하기
-	public StatusResponse signOut(String accessToken) throws IllegalAccessException {
+	public StatusResponse deleteAccount(String accessToken) throws IllegalAccessException {
 		String token=jwtTokenProvider.extractJwtToken(accessToken);
 		if (! jwtTokenProvider.validateToken(token)) {
 			return null;
