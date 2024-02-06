@@ -20,8 +20,9 @@ public enum ErrorCode {
 	MALFORMED_JWT_TOKEN(401,"C012","MalformedJwtException 잘못된 jwt 구조"),
 	EXPIRED_JWT_TOKEN(401,"C013","ExpiredJwtException 토큰 만료"),
 	UNAUTHORIZED_JWT_TOKEN(401,"C014","Unauthorized"),
-
-	BOOKMARK_BAD_REQUEST(400,"C015","북마크 API 잘못된 요청")
+	LOGOUT_JWT_TOKEN(401,"C015","로그아웃 된 토큰 입니다."),
+	ENTITY_NOT_FOUND_JWT_TOKEN(401,"C016","일치하는 Refresh Token 존재하지 않습니다."),
+	BOOKMARK_BAD_REQUEST(400,"C017","북마크 API 잘못된 요청")
 	;
 
 
