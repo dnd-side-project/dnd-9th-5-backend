@@ -1,5 +1,7 @@
 package com.dndoz.PosePicker.Controller;
 
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Slice;
@@ -7,17 +9,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.dndoz.PosePicker.Dto.PoseFeedRequest;
 import com.dndoz.PosePicker.Dto.PoseFeedResponse;
 import com.dndoz.PosePicker.Dto.PoseInfoResponse;
 import com.dndoz.PosePicker.Dto.PoseTagAttributeResponse;
 import com.dndoz.PosePicker.Dto.PoseTalkResponse;
+import com.dndoz.PosePicker.Dto.PoseUploadRequest;
 import com.dndoz.PosePicker.Service.PoseService;
 
 import io.swagger.annotations.Api;
@@ -54,6 +60,37 @@ public class PoseController {
 		IllegalAccessException {
 		logger.info("[getPoseInfo] 포즈 사진 상세 조회 요청");
 		return ResponseEntity.ok(poseService.getPoseInfo(accessToken,pose_id));
+	}
+
+	/**
+	 * @Description 포즈 업로드
+	 * @param peopleCount
+	 * @param frameCount
+	 * @param tags
+	 * @param source
+	 * @param sourceUrl
+	 * @param description
+	 * @param multipartFile
+	 * @return
+	 * @throws IOException
+	 */
+	@ResponseStatus(HttpStatus.CREATED)
+	@ApiResponse(code = 201, message = "포즈 데이터 업로드 완료")
+	@ApiOperation(value = "포즈 데이터 업로드", notes = "포즈 사진 업로드")
+	@PostMapping("/")
+	public ResponseEntity<?> uploadData(
+		@RequestHeader(value= "Authorization", required=false) String accessToken,
+		@RequestPart(value = "peopleCount") String peopleCount,
+		@RequestPart(value = "frameCount") String frameCount,
+		@RequestPart(value = "tags") String tags,
+		@RequestPart(value = "source", required = false) String source,
+		@RequestPart(value = "sourceUrl", required = false) String sourceUrl,
+		@RequestPart(value = "description", required = false) String description,
+		@RequestPart(value = "file") MultipartFile multipartFile) throws IOException, IllegalAccessException {
+		PoseUploadRequest poseUploadRequest = new PoseUploadRequest(peopleCount, frameCount, tags, source, sourceUrl,
+			description);
+		poseService.uploadPose(accessToken, poseUploadRequest, multipartFile);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
 	/**
