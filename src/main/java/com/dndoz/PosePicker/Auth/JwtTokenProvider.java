@@ -83,7 +83,7 @@ public class JwtTokenProvider {
 			Jws<Claims> claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token);
 			//Redis에 있는 엑세스 토큰인 경우 로그아웃 처리된 엑세스 토큰임.
 			if (hasKeyBlackList(token)){
-				throw new CustomTokenException("로그아웃 된 토큰 입니다");
+				throw new CustomTokenException("로그아웃/탈퇴 된 토큰 입니다");
 			}
 			return !claims.getBody().getExpiration().before(new Date());
 		} catch (ExpiredJwtException e) {

@@ -5,9 +5,10 @@ import com.dndoz.PosePicker.Auth.AuthTokensGenerator;
 import com.dndoz.PosePicker.Auth.JwtTokenProvider;
 import com.dndoz.PosePicker.Auth.PPJwtTokenProvider;
 import com.dndoz.PosePicker.Domain.User;
-//import com.dndoz.PosePicker.Domain.Withdrawal;
-import com.dndoz.PosePicker.Dto.BookmarkResponse;
-//import com.dndoz.PosePicker.Dto.DeleteAccountRequest;
+import com.dndoz.PosePicker.Domain.Withdrawal;
+import com.dndoz.PosePicker.Domain.Withdrawal;
+import com.dndoz.PosePicker.Dto.DeleteAccountRequest;
+import com.dndoz.PosePicker.Dto.DeleteAccountRequest;
 import com.dndoz.PosePicker.Dto.KakaoLoginRequest;
 import com.dndoz.PosePicker.Dto.LoginResponse;
 import com.dndoz.PosePicker.Dto.LogoutRequest;
@@ -17,7 +18,7 @@ import com.dndoz.PosePicker.Global.status.StatusResponse;
 import com.dndoz.PosePicker.Repository.BookmarkRepository;
 import com.dndoz.PosePicker.Repository.UserRepository;
 
-//import com.dndoz.PosePicker.Repository.WithdrawalRepository;
+import com.dndoz.PosePicker.Repository.WithdrawalRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,8 +52,8 @@ public class KakaoService {
 	private final JwtTokenProvider jwtTokenProvider;
 	private final PPJwtTokenProvider psJwTokenProvider;
 	private final RedisTemplate<String, String> redisTemplate;
-	private final BookmarkRepository bookmarkRepository;
-	//private final WithdrawalRepository withdrawalRepository;
+	//private final BookmarkRepository bookmarkRepository;
+	private final WithdrawalRepository withdrawalRepository;
 
 	/** [1] ios 버전 카카오 로그인 **/
 	//포즈피커 자체 토큰 생성 후 전달
@@ -254,18 +255,35 @@ public class KakaoService {
 		return new StatusResponse(StatusCode.OK,"로그아웃 성공");
 	}
 
-    //탈퇴하기
-	public StatusResponse deleteAccount(String accessToken) throws IllegalAccessException {
-		String token=jwtTokenProvider.extractJwtToken(accessToken);
-		if (! jwtTokenProvider.validateToken(token)) {
+	//탈퇴하기
+	@Transactional
+	public StatusResponse deleteAccount(DeleteAccountRequest deleteAccountRequest) throws IllegalAccessException {
+		String accessToken=jwtTokenProvider.extractJwtToken(deleteAccountRequest.getAccessToken());
+		String refreshToken=jwtTokenProvider.extractJwtToken(deleteAccountRequest.getRefreshToken());
+
+		if (! (jwtTokenProvider.validateToken(accessToken) || jwtTokenProvider.validateToken(refreshToken))) {
 			return null;
 		}
-		Long uid= Long.valueOf(jwtTokenProvider.extractUid(token));
-		User user=userRepository.findById(uid).orElseThrow(NullPointerException::new);
+		String uid= jwtTokenProvider.extractUid(accessToken);
+		User user=userRepository.findById(Long.valueOf(uid)).orElseThrow(NullPointerException::new);
 
-		//북마크 정보, 회원 정보 삭제
-		bookmarkRepository.deleteByUser(user);
-		userRepository.delete(user);
+		//Redis 에 해당 refreshToken 으로 저장된 uid 있는지 여부 확인 후 refresh Token 삭제
+		if (jwtTokenProvider.findRefreshToken(refreshToken).equals(uid) || jwtTokenProvider.findRefreshToken(refreshToken) !=null) {
+			redisTemplate.delete("refresh:"+refreshToken);
+		}
+
+		// 탈퇴 Access Token BlackList 에 저장하기
+		Long expiration = jwtTokenProvider.getExpiration(accessToken);
+		redisTemplate.opsForValue().set(accessToken,"withdraw", expiration, TimeUnit.MILLISECONDS);
+
+		//북마크 정보 삭제, 탈퇴 사유 저장, 회원 정보 삭제
+		//bookmarkRepository.deleteByUser(user);
+		//userRepository.delete(user);
+
+		//탈퇴사유 저장
+		Withdrawal withdrawal= new Withdrawal(Long.valueOf(uid),deleteAccountRequest.getWithdrawalReason());
+		withdrawalRepository.save(withdrawal);
+
 		return new StatusResponse(StatusCode.OK,"회원 탈퇴 성공");
 	}
 }

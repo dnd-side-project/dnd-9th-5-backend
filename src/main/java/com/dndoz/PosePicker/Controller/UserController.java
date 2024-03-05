@@ -84,12 +84,11 @@ public class UserController {
 	}
 
 	@ResponseBody
-	@DeleteMapping("/deleteAccount")
+	@PatchMapping("/deleteAccount")
 	@ApiOperation(value = "탈퇴하기", notes = "북마크 정보 삭제 후 회원 탈퇴")
-	public ResponseEntity<StatusResponse> deleteAccount(
-		@RequestHeader(value= "Authorization", required=false) String accessToken){
+	public ResponseEntity<StatusResponse> deleteAccount(@RequestBody DeleteAccountRequest deleteAccountRequest){
 		try{
-			return ResponseEntity.ok(kakaoService.deleteAccount(accessToken));
+			return ResponseEntity.ok(kakaoService.deleteAccount(deleteAccountRequest));
 		} catch (NoSuchElementException | IllegalAccessException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Item Not Found");
 		}
