@@ -76,9 +76,8 @@ public interface PoseInfoRepository extends JpaRepository<PoseInfo, Long> {
 	@Query(value =
 		"SELECT p.*, GROUP_CONCAT(ta.attribute ORDER BY ta.attribute_id ASC) AS t_tag_attributes FROM pose_info p "
 			+ "JOIN tag t ON p.pose_id = t.pose_id " + "JOIN tag_attribute ta ON t.attribute_id = ta.attribute_id "
-			+ "JOIN bookmark b ON b.pose_id = p.pose_id "
-			+ "WHERE b.uid = :uid "
-			+ "GROUP BY p.pose_id ", nativeQuery = true)
+			+ "JOIN bookmark b ON b.pose_id = p.pose_id " + "WHERE b.uid = :uid "
+			+ "GROUP BY p.pose_id " + "ORDER BY b.updated_at DESC ", nativeQuery = true)
 	Slice<PoseInfo> findBookmark(@Param("uid") Long uid, Pageable pageable);
 
 }

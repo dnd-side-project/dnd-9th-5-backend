@@ -1,5 +1,6 @@
 package com.dndoz.PosePicker.Controller;
 
+import com.dndoz.PosePicker.Dto.DeleteAccountRequest;
 import com.dndoz.PosePicker.Dto.KakaoLoginRequest;
 import com.dndoz.PosePicker.Dto.LoginResponse;
 import com.dndoz.PosePicker.Dto.LogoutRequest;
@@ -32,11 +33,11 @@ public class UserController {
     @ResponseBody
     @GetMapping("/login/oauth/kakao")
 	@ApiOperation(value = "웹 카카오 로그인", notes = "웹 프론트 버전 카카오 로그인")
-    public ResponseEntity<LoginResponse> kakaoLogin(@RequestParam String code, HttpServletRequest request){
+    public ResponseEntity<LoginResponse> kakaoLogin(@RequestParam String code, @RequestParam String redirectURI){
         try{
 			// 현재 도메인 확인
-			String currentDomain = request.getServerName();
-            return ResponseEntity.ok(kakaoService.kakaoLogin(code, currentDomain));
+			//String currentDomain = request.getServerName();
+            return ResponseEntity.ok(kakaoService.kakaoLogin(code, redirectURI));
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Item Not Found");
         }
@@ -83,12 +84,11 @@ public class UserController {
 	}
 
 	@ResponseBody
-	@DeleteMapping("/signOut")
+	@PatchMapping("/deleteAccount")
 	@ApiOperation(value = "탈퇴하기", notes = "북마크 정보 삭제 후 회원 탈퇴")
-	public ResponseEntity<StatusResponse> signOut(
-		@RequestHeader(value= "Authorization", required=false) String accessToken){
+	public ResponseEntity<StatusResponse> deleteAccount(@RequestBody DeleteAccountRequest deleteAccountRequest){
 		try{
-			return ResponseEntity.ok(kakaoService.signOut(accessToken));
+			return ResponseEntity.ok(kakaoService.deleteAccount(deleteAccountRequest));
 		} catch (NoSuchElementException | IllegalAccessException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Item Not Found");
 		}
