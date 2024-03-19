@@ -272,13 +272,9 @@ public class KakaoService {
 			redisTemplate.delete("refresh:"+refreshToken);
 		}
 
-		// 탈퇴 Access Token BlackList 에 저장하기
-		Long expiration = jwtTokenProvider.getExpiration(accessToken);
-		redisTemplate.opsForValue().set(accessToken,"withdraw", expiration, TimeUnit.MILLISECONDS);
-
 		//북마크 정보 삭제, 탈퇴 사유 저장, 회원 정보 삭제
-		//bookmarkRepository.deleteByUser(user);
-		//userRepository.delete(user);
+		bookmarkRepository.deleteByUser(user);
+		userRepository.delete(user);
 
 		//탈퇴사유 저장
 		Withdrawal withdrawal= new Withdrawal(Long.valueOf(uid),deleteAccountRequest.getWithdrawalReason());
